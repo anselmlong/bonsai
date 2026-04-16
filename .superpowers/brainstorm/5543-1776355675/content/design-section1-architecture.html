@@ -1,0 +1,126 @@
+<h2>Design — Section 1: System Architecture</h2>
+<p class="subtitle">Three layers, clean boundaries, SSE as the data spine</p>
+
+<div class="mockup">
+  <div class="mockup-header">Full System Overview</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;padding:16px">
+
+    <div style="display:flex;gap:0;align-items:stretch">
+
+      <!-- Frontend -->
+      <div style="flex:1;border:1px solid #58a6ff;border-radius:6px;padding:12px">
+        <div style="color:#58a6ff;font-weight:bold;margin-bottom:8px">Next.js Frontend</div>
+        <div style="color:#8b949e;font-size:11px;margin-bottom:6px">port 3000</div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;margin-bottom:6px;font-size:11px">
+          <div style="color:#e6edf3">ResearchPage</div>
+          <div style="padding-left:10px;color:#8b949e">├─ QueryInput</div>
+          <div style="padding-left:10px;color:#8b949e">├─ ResearchTree (split panel)</div>
+          <div style="padding-left:20px;color:#6e7681">│  ├─ TreePanel (left)</div>
+          <div style="padding-left:20px;color:#6e7681">│  └─ NodeDetail (right)</div>
+          <div style="padding-left:10px;color:#8b949e">└─ GraphView (toggle)</div>
+        </div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;font-size:11px">
+          <div style="color:#3fb950">EventSource /research/:id/stream</div>
+          <div style="color:#8b949e;padding-left:10px">→ append nodes to tree in real time</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 12px;gap:4px">
+        <div style="color:#3fb950;font-size:11px">SSE stream</div>
+        <div style="color:#e6edf3;font-size:18px">⇄</div>
+        <div style="color:#8b949e;font-size:11px">POST /research</div>
+      </div>
+
+      <!-- Backend -->
+      <div style="flex:1;border:1px solid #79c0ff;border-radius:6px;padding:12px">
+        <div style="color:#79c0ff;font-weight:bold;margin-bottom:8px">FastAPI Backend</div>
+        <div style="color:#8b949e;font-size:11px;margin-bottom:6px">port 8000</div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;margin-bottom:6px;font-size:11px">
+          <div style="color:#e6edf3">POST /research</div>
+          <div style="color:#e6edf3">GET  /research/:id/stream  <span style="color:#3fb950">(SSE)</span></div>
+          <div style="color:#e6edf3">GET  /research/:id/result</div>
+          <div style="color:#e6edf3">POST /research/:id/dive-deeper</div>
+        </div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;font-size:11px">
+          <div style="color:#f78166">asyncio.Queue per job</div>
+          <div style="color:#8b949e;padding-left:10px">graph emits → queue → SSE</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 12px;gap:4px">
+        <div style="color:#8b949e;font-size:11px">streams</div>
+        <div style="color:#e6edf3;font-size:18px">→</div>
+        <div style="color:#8b949e;font-size:11px">events</div>
+      </div>
+
+      <!-- LangGraph -->
+      <div style="flex:1.2;border:1px solid #a5d6ff;border-radius:6px;padding:12px">
+        <div style="color:#a5d6ff;font-weight:bold;margin-bottom:8px">LangGraph Engine</div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;margin-bottom:6px;font-size:11px">
+          <div style="color:#e6edf3">ResearchGraph (root)</div>
+          <div style="padding-left:10px;color:#79c0ff">planner (GPT-4o)</div>
+          <div style="padding-left:10px;color:#79c0ff">fan_out → Send(BranchGraph×N)</div>
+          <div style="padding-left:10px;color:#79c0ff">reduce</div>
+          <div style="padding-left:10px;color:#79c0ff">synthesizer (GPT-4o)</div>
+        </div>
+        <div style="background:#161b22;border-radius:4px;padding:8px;font-size:11px">
+          <div style="color:#e6edf3">BranchGraph (subgraph, reusable)</div>
+          <div style="padding-left:10px;color:#a5d6ff">searcher (GPT-4o-mini)</div>
+          <div style="padding-left:10px;color:#a5d6ff">reflect</div>
+          <div style="padding-left:10px;color:#a5d6ff">recurse? → child BranchGraph</div>
+          <div style="padding-left:20px;border:1px dashed #30363d;border-radius:3px;padding:4px;margin-top:4px">
+            <div style="color:#6e7681">BranchGraph (depth+1)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- External services row -->
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <div style="flex:1;border:1px solid #30363d;border-radius:4px;padding:8px;text-align:center;font-size:11px">
+        <div style="color:#f78166">Tavily API</div>
+        <div style="color:#8b949e">web search</div>
+      </div>
+      <div style="flex:1;border:1px solid #30363d;border-radius:4px;padding:8px;text-align:center;font-size:11px">
+        <div style="color:#f78166">OpenAI API</div>
+        <div style="color:#8b949e">GPT-4o + GPT-4o-mini</div>
+      </div>
+      <div style="flex:1;border:1px solid #30363d;border-radius:4px;padding:8px;text-align:center;font-size:11px">
+        <div style="color:#f78166">Anthropic API</div>
+        <div style="color:#8b949e">Claude Sonnet (alt planner)</div>
+      </div>
+      <div style="flex:2;border:1px solid #30363d;border-radius:4px;padding:8px;text-align:center;font-size:11px">
+        <div style="color:#3fb950">scripts/eval.py</div>
+        <div style="color:#8b949e">SimpleQA subset → agent → LLM grader → accuracy report</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <div class="label">Key architectural decisions</div>
+  <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+    <div style="flex:1;min-width:180px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">asyncio.Queue per job</strong><br/>
+      <span style="color:var(--text-secondary)">Graph runs in background task. Every node event is pushed to a queue. SSE endpoint drains the queue. No polling, no DB needed.</span>
+    </div>
+    <div style="flex:1;min-width:180px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">Typed NodeEvent schema</strong><br/>
+      <span style="color:var(--text-secondary)">Every event carries node_id, parent_id, depth, type. Frontend reconstructs the tree purely from the event stream.</span>
+    </div>
+    <div style="flex:1;min-width:180px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">BranchGraph is isolated</strong><br/>
+      <span style="color:var(--text-secondary)">Takes a question + depth + config. Returns sources + summary. Fully testable in isolation without the root graph.</span>
+    </div>
+    <div style="flex:1;min-width:180px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">Dive Deeper endpoint</strong><br/>
+      <span style="color:var(--text-secondary)">POST /research/:id/dive-deeper with a node_id spawns a new BranchGraph rooted at that node. Same SSE stream, new events appended.</span>
+    </div>
+  </div>
+</div>
+
+<p style="font-size:13px;color:var(--text-secondary);margin-top:16px">Does this architecture look right? Any changes before we move to Section 2 (LangGraph state & node events)?</p>

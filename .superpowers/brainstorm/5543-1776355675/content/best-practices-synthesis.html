@@ -1,0 +1,91 @@
+<h2>Best Practices Research — Synthesis</h2>
+<p class="subtitle">Anthropic engineering blog + LangGraph community + 2026 multi-agent literature</p>
+
+<div class="section">
+  <div class="label">Cluster 1 — From Anthropic's Own Multi-Agent Research System</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(99,255,170,0.3);border-radius:6px;background:rgba(99,255,170,0.04);font-size:13px">
+      <strong style="color:#3fb950">Opus lead + Sonnet subagents</strong><br/>
+      <span style="color:var(--text-secondary)">This multi-model pattern outperforms single-agent Opus by <strong>90.2%</strong> on breadth-first queries. Validates our multi-model choice.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(99,255,170,0.3);border-radius:6px;background:rgba(99,255,170,0.04);font-size:13px">
+      <strong style="color:#3fb950">3–5 parallel subagents</strong><br/>
+      <span style="color:var(--text-secondary)">Teams of 20+ underperform. Planner should generate <strong>3–5 sub-questions max</strong> per level. We should enforce this as a config param.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(99,255,170,0.3);border-radius:6px;background:rgba(99,255,170,0.04);font-size:13px">
+      <strong style="color:#3fb950">Token efficiency = 80% of variance</strong><br/>
+      <span style="color:var(--text-secondary)">Keep BranchGraph context minimal. Don't pass full research tree to leaf nodes — only the branch question + parent summary.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(99,255,170,0.3);border-radius:6px;background:rgba(99,255,170,0.04);font-size:13px">
+      <strong style="color:#3fb950">LLM-as-judge dimensions</strong><br/>
+      <span style="color:var(--text-secondary)">SimpleQA eval should score: <em>factual accuracy, citation accuracy, completeness, source quality, tool efficiency</em>. Not just binary correct/wrong.</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Cluster 2 — LangGraph-Specific Best Practices</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(88,166,255,0.3);border-radius:6px;background:rgba(88,166,255,0.04);font-size:13px">
+      <strong style="color:#58a6ff">Send API for map-reduce</strong><br/>
+      <span style="color:var(--text-secondary)">Native pattern for fan-out. Return a list of <code>Send(node, state)</code> objects from fan_out node. LangGraph scheduler runs them concurrently.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(88,166,255,0.3);border-radius:6px;background:rgba(88,166,255,0.04);font-size:13px">
+      <strong style="color:#58a6ff">Keep sub-agent state small</strong><br/>
+      <span style="color:var(--text-secondary)">Node-specific states should contain only fields the node produces. Don't bloat BranchState with full parent context.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(88,166,255,0.3);border-radius:6px;background:rgba(88,166,255,0.04);font-size:13px">
+      <strong style="color:#58a6ff">Built-in checkpointing</strong><br/>
+      <span style="color:var(--text-secondary)">LangGraph's MemorySaver gives us free checkpoint-based error recovery. Resume from last good node on failure instead of restarting entirely.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid rgba(88,166,255,0.3);border-radius:6px;background:rgba(88,166,255,0.04);font-size:13px">
+      <strong style="color:#58a6ff">Observability from day one</strong><br/>
+      <span style="color:var(--text-secondary)">LangSmith tracing (free tier) for production debugging. Structured logs per node event. Non-determinism is hard to debug without traces.</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Cluster 3 — Design Changes This Triggers</div>
+  <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <span style="color:#f78166;font-size:16px;margin-top:1px">⚠</span>
+      <div>
+        <strong>Add max_branches config (was implicit, now explicit)</strong><br/>
+        <span style="color:var(--text-secondary)">Planner must be instructed to generate exactly N sub-questions (default 3–5). Add <code>max_branches: int = 4</code> and <code>max_depth: int = 2</code> as ResearchConfig fields.</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <span style="color:#f78166;font-size:16px;margin-top:1px">⚠</span>
+      <div>
+        <strong>BranchGraph gets only branch question + parent summary (not full state)</strong><br/>
+        <span style="color:var(--text-secondary)">Original design passed too much context. Each BranchGraph input: <code>{question, depth, parent_summary, config}</code>. Keeps token count down, improves reliability.</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <span style="color:#3fb950;font-size:16px;margin-top:1px">✚</span>
+      <div>
+        <strong>Add LangGraph MemorySaver checkpointing</strong><br/>
+        <span style="color:var(--text-secondary)">Wire in LangGraph's built-in checkpointer. On /research/:id/result endpoint, check checkpoint state before running — enables resume-on-failure for long research jobs.</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <span style="color:#3fb950;font-size:16px;margin-top:1px">✚</span>
+      <div>
+        <strong>Richer eval dimensions in scripts/eval.py</strong><br/>
+        <span style="color:var(--text-secondary)">LLM-as-judge scores 5 dimensions per answer: factual accuracy, citation accuracy, completeness, source quality, tool efficiency. Report per-dimension breakdown, not just pass/fail.</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <span style="color:#3fb950;font-size:16px;margin-top:1px">✚</span>
+      <div>
+        <strong>LangSmith tracing (optional, free tier)</strong><br/>
+        <span style="color:var(--text-secondary)">Add LANGSMITH_API_KEY env var support. If set, all graph runs are traced automatically. Strong demo talking point: "here's a full trace of that research run."</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:14px;background:rgba(165,214,255,0.07);border:1px solid rgba(165,214,255,0.2);border-radius:8px;margin-top:16px;font-size:13px">
+  <strong>Bottom line:</strong> Our architecture is well-aligned with best practices. The main refinements are: enforce max_branches/max_depth explicitly, slim down BranchGraph input state, add MemorySaver checkpointing, and enrich the eval with multi-dimension LLM-as-judge scoring. The Anthropic article is a direct endorsement of the multi-model orchestrator+worker pattern we already chose.
+</div>

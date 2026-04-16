@@ -1,0 +1,104 @@
+<h2>Best AI Search APIs for Agents — Last 30 Days</h2>
+<p class="subtitle">Synthesized from Reddit, dev communities, benchmarks, and tech coverage — April 2026</p>
+
+<div class="section">
+  <div class="label">Cluster 1 — Agent Search API Rankings (Developer-Facing)</div>
+  <div style="overflow-x:auto;margin-top:12px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:8px 12px">API</th>
+          <th style="text-align:center;padding:8px 12px">Agent Score</th>
+          <th style="text-align:center;padding:8px 12px">Latency</th>
+          <th style="text-align:left;padding:8px 12px">Best For</th>
+          <th style="text-align:left;padding:8px 12px">Pricing</th>
+          <th style="text-align:center;padding:8px 12px">LangGraph Integration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);background:rgba(99,255,170,0.06)">
+          <td style="padding:8px 12px;font-weight:600">Brave Search API</td>
+          <td style="text-align:center;padding:8px 12px">14.89 ⭐</td>
+          <td style="text-align:center;padding:8px 12px">669 ms ⚡</td>
+          <td style="padding:8px 12px">High-volume, independent index, no Google/Bing dependency</td>
+          <td style="padding:8px 12px">$3–5 / 1k reqs</td>
+          <td style="text-align:center;padding:8px 12px">Good (via LangChain)</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-weight:600">Exa</td>
+          <td style="text-align:center;padding:8px 12px">~14.5</td>
+          <td style="text-align:center;padding:8px 12px">~500 ms ⚡⚡</td>
+          <td style="padding:8px 12px">Semantic / multi-hop research, 81% complex retrieval</td>
+          <td style="padding:8px 12px">Pay per query</td>
+          <td style="text-align:center;padding:8px 12px">Good</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-weight:600">Tavily</td>
+          <td style="text-align:center;padding:8px 12px">13.67</td>
+          <td style="text-align:center;padding:8px 12px">998 ms</td>
+          <td style="padding:8px 12px">Agent-native design, structured results, RAG pipelines</td>
+          <td style="padding:8px 12px">1k free credits/mo, $0.008/credit</td>
+          <td style="text-align:center;padding:8px 12px">Native ⭐</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 12px;font-weight:600">SerpAPI</td>
+          <td style="text-align:center;padding:8px 12px">~12</td>
+          <td style="text-align:center;padding:8px 12px">~1200 ms</td>
+          <td style="padding:8px 12px">Full Google results, structured data extraction</td>
+          <td style="padding:8px 12px">$50/mo base</td>
+          <td style="text-align:center;padding:8px 12px">Via wrapper</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Cluster 2 — Key Signals from Dev Communities</div>
+  <div class="cards" style="margin-top:12px">
+    <div class="card" style="cursor:default">
+      <div class="card-body">
+        <h3>⚠️ Tavily Acquired by Nebius (Feb 2026)</h3>
+        <p>Amsterdam-based AI cloud company Nebius acquired Tavily. Some devs are evaluating alternatives over concern about product direction changes. Tavily still works great today — but it's a risk flag for long-term projects.</p>
+      </div>
+    </div>
+    <div class="card" style="cursor:default">
+      <div class="card-body">
+        <h3>🔥 Exa Outperforms on Semantic Search</h3>
+        <p>81% vs 71% on complex multi-hop retrieval. 2–3x faster than Tavily. Also supports people, company, and code search — useful for research agents going deep on a topic.</p>
+      </div>
+    </div>
+    <div class="card" style="cursor:default">
+      <div class="card-body">
+        <h3>✅ Tavily Still Has Best LangGraph DX</h3>
+        <p>First-class LangChain/LangGraph tool integration. Cleanest result schema for agent consumption. Best documentation for the exact use case. Free tier (1k credits/mo) covers prototyping comfortably.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Cluster 3 — Consumer AI Search (Perplexity-style inspiration)</div>
+  <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px">Relevant as design inspiration for your frontend node UI</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px;padding:12px;border:1px solid var(--border);border-radius:8px">
+      <strong>Perplexity</strong>
+      <p style="font-size:13px;margin:6px 0 0">94.3% citation accuracy. Deep Research does dozens of searches → hundreds of sources → comprehensive report. Now uses Claude Opus 4.6. 45M MAU. Best UX inspiration for your node graph.</p>
+    </div>
+    <div style="flex:1;min-width:200px;padding:12px;border:1px solid var(--border);border-radius:8px">
+      <strong>ChatGPT Search</strong>
+      <p style="font-size:13px;margin:6px 0 0">Fastest-growing. Conversational + search combined. Less transparent sourcing than Perplexity. Holds ~86% market share combined with Gemini.</p>
+    </div>
+    <div style="flex:1;min-width:200px;padding:12px;border:1px solid var(--border);border-radius:8px">
+      <strong>Grok</strong>
+      <p style="font-size:13px;margin:6px 0 0">Real-time X/Twitter data. Fast and conversational. Best for trending topics, weak for deep academic research.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="padding:16px;background:rgba(99,180,255,0.07);border:1px solid rgba(99,180,255,0.2);border-radius:8px">
+  <div class="label" style="margin-bottom:8px">Recommendation for Bonsai</div>
+  <p style="font-size:14px;margin:0">
+    <strong>Start with Tavily</strong> — best LangGraph DX, cleanest agent-native results, free tier covers dev. Design the search tool interface abstractly so you can swap to Exa or Brave later. The Nebius acquisition is worth watching but doesn't affect you today. For the frontend, Perplexity's source panel is your best design reference.
+  </p>
+</div>

@@ -1,0 +1,131 @@
+<h2>Design — Section 4: Eval Script & Project Structure</h2>
+<p class="subtitle">scripts/eval.py + full repo layout</p>
+
+<div class="section">
+  <div class="label">scripts/eval.py — SimpleQA evaluation harness</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:16px;font-size:12px;overflow-x:auto;margin-top:10px;line-height:1.6"><code style="color:#e6edf3"><span style="color:#8b949e"># scripts/eval.py
+# Usage: python scripts/eval.py --n 50 --output results/eval-2026-04-17.json</span>
+
+<span style="color:#8b949e"># Pipeline:</span>
+<span style="color:#8b949e">#  1. Load N questions from SimpleQA dataset (huggingface or local CSV)</span>
+<span style="color:#8b949e">#  2. Run each through the research agent (async, configurable concurrency)</span>
+<span style="color:#8b949e">#  3. Grade each answer with LLM-as-judge (5 dimensions)</span>
+<span style="color:#8b949e">#  4. Write per-question JSONL + summary report</span>
+
+<span style="color:#ff7b72">class</span> <span style="color:#ffa657">EvalResult</span>(TypedDict):
+    question:    <span style="color:#a5d6ff">str</span>
+    gold_answer: <span style="color:#a5d6ff">str</span>
+    agent_answer: <span style="color:#a5d6ff">str</span>
+    latency_s:   <span style="color:#79c0ff">float</span>
+    branch_count: <span style="color:#79c0ff">int</span>
+    source_count: <span style="color:#79c0ff">int</span>
+    scores: <span style="color:#ff7b72">dict</span>[<span style="color:#a5d6ff">str</span>, <span style="color:#79c0ff">float</span>]   <span style="color:#8b949e"># per-dimension 0.0–1.0</span>
+
+<span style="color:#8b949e"># Grading dimensions (LLM-as-judge, single prompt per question):</span>
+DIMENSIONS = [
+    <span style="color:#a5d6ff">"factual_accuracy"</span>,    <span style="color:#8b949e"># does the answer match gold?</span>
+    <span style="color:#a5d6ff">"citation_accuracy"</span>,   <span style="color:#8b949e"># are sources real and relevant?</span>
+    <span style="color:#a5d6ff">"completeness"</span>,        <span style="color:#8b949e"># does it cover all aspects of the question?</span>
+    <span style="color:#a5d6ff">"source_quality"</span>,      <span style="color:#8b949e"># authoritative sources vs SEO content?</span>
+    <span style="color:#a5d6ff">"conciseness"</span>,         <span style="color:#8b949e"># no hallucinated padding?</span>
+]
+
+<span style="color:#8b949e"># Output: summary report printed to stdout</span>
+<span style="color:#8b949e"># ─────────────────────────────────────────</span>
+<span style="color:#8b949e"># SimpleQA Eval — bonsai v0.1.0</span>
+<span style="color:#8b949e"># Questions:        50</span>
+<span style="color:#8b949e"># Correct (≥0.7):   41  (82.0%)</span>
+<span style="color:#8b949e"># Avg latency:      8.3s</span>
+<span style="color:#8b949e"># Avg sources:      12.4</span>
+<span style="color:#8b949e"># ─────────────────────────────────────────</span>
+<span style="color:#8b949e"># Dimension scores:</span>
+<span style="color:#8b949e">#   factual_accuracy   0.84</span>
+<span style="color:#8b949e">#   citation_accuracy  0.79</span>
+<span style="color:#8b949e">#   completeness       0.81</span>
+<span style="color:#8b949e">#   source_quality     0.76</span>
+<span style="color:#8b949e">#   conciseness        0.88</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">Full project structure</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:16px;font-size:12px;line-height:1.65;margin-top:10px"><code style="color:#e6edf3">bonsai/
+<span style="color:#8b949e">│
+│  # ── Backend ──────────────────────────────────────────</span>
+├── backend/
+│   ├── main.py                   <span style="color:#8b949e">← FastAPI app, routes, SSE endpoint</span>
+│   ├── config.py                 <span style="color:#8b949e">← ResearchConfig, env vars (pydantic-settings)</span>
+│   │
+│   ├── agents/
+│   │   ├── research_graph.py     <span style="color:#8b949e">← ResearchGraph: planner→fan_out→reduce→synthesize</span>
+│   │   ├── branch_graph.py       <span style="color:#8b949e">← BranchGraph subgraph (reusable, testable in isolation)</span>
+│   │   ├── nodes/
+│   │   │   ├── planner.py        <span style="color:#8b949e">← LLM call, emits sub_questions (scaling rules in prompt)</span>
+│   │   │   ├── searcher.py       <span style="color:#8b949e">← Tavily tool call, returns SearchResult[]</span>
+│   │   │   ├── reflect.py        <span style="color:#8b949e">← decides whether to recurse</span>
+│   │   │   └── synthesizer.py    <span style="color:#8b949e">← final answer from all branch results</span>
+│   │   └── prompts/
+│   │       ├── planner.md        <span style="color:#8b949e">← system prompt with scaling rules embedded</span>
+│   │       ├── reflect.md
+│   │       └── synthesizer.md
+│   │
+│   ├── models/
+│   │   └── types.py              <span style="color:#8b949e">← NodeEvent, BranchState, ResearchState, Source, etc.</span>
+│   │
+│   └── tests/
+│       ├── test_branch_graph.py  <span style="color:#8b949e">← unit tests: BranchGraph in isolation (mocked Tavily)</span>
+│       ├── test_research_graph.py<span style="color:#8b949e">← integration: full graph with real Tavily (slow, marked)</span>
+│       └── test_nodes.py         <span style="color:#8b949e">← unit tests: individual node functions</span>
+<span style="color:#8b949e">│
+│  # ── Frontend ─────────────────────────────────────────</span>
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx              <span style="color:#8b949e">← root: QueryInput + layout shell</span>
+│   │   └── research/[jobId]/
+│   │       └── page.tsx          <span style="color:#8b949e">← ResearchPage (SSE consumer)</span>
+│   ├── components/
+│   │   ├── ResearchTree.tsx      <span style="color:#8b949e">← orchestrates stream + tree state</span>
+│   │   ├── TreePanel.tsx
+│   │   ├── NodeDetail.tsx
+│   │   ├── GraphView.tsx         <span style="color:#8b949e">← React Flow (lazy-loaded)</span>
+│   │   ├── SourceCard.tsx
+│   │   └── StatusBar.tsx
+│   ├── hooks/
+│   │   ├── useResearchStream.ts  <span style="color:#8b949e">← EventSource → NodeEvent[]</span>
+│   │   └── useResearchTree.ts    <span style="color:#8b949e">← NodeEvent[] → tree structure</span>
+│   └── lib/
+│       └── types.ts              <span style="color:#8b949e">← shared types (mirrors backend/models/types.py)</span>
+<span style="color:#8b949e">│
+│  # ── Eval ───────────────────────────────────────────</span>
+├── scripts/
+│   └── eval.py                   <span style="color:#8b949e">← SimpleQA harness (standalone, no app deps)</span>
+<span style="color:#8b949e">│
+│  # ── Config & docs ──────────────────────────────────</span>
+├── .env.example                  <span style="color:#8b949e">← OPENAI_API_KEY, TAVILY_API_KEY, LANGSMITH_API_KEY</span>
+├── pyproject.toml                <span style="color:#8b949e">← backend deps (uv or poetry)</span>
+├── README.md                     <span style="color:#8b949e">← setup, curl example, eval instructions, demo link</span>
+└── PROCESS.md                    <span style="color:#8b949e">← already exists</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">Testing strategy — what gets tested and how</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">Unit: individual nodes</strong><br/>
+      <span style="color:var(--text-secondary)">test_nodes.py — each node function takes state in, returns state out. Mock the LLM and Tavily. Fast, deterministic.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#3fb950">Unit: BranchGraph</strong><br/>
+      <span style="color:var(--text-secondary)">test_branch_graph.py — run the full BranchGraph with mocked search + LLM. Tests recursion logic, depth capping, event emission.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#58a6ff">Integration: full graph</strong><br/>
+      <span style="color:var(--text-secondary)">test_research_graph.py — marked <code>@pytest.mark.slow</code>. Real Tavily + LLM. Run manually or in CI with --run-slow flag.</span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+      <strong style="color:#f78166">Eval: SimpleQA</strong><br/>
+      <span style="color:var(--text-secondary)">scripts/eval.py — separate from pytest. Outputs a JSON report you can include in the README as a benchmark result.</span>
+    </div>
+  </div>
+</div>
+
+<p style="font-size:13px;color:var(--text-secondary);margin-top:16px">This covers all sections. Does the full design look right before we write the spec doc?</p>

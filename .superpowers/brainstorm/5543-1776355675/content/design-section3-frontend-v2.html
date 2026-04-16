@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonsai — Frontend Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&family=Azeret+Mono:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         oklch(14% 0.012 250);
+    --surface:    oklch(18% 0.010 250);
+    --surface-2:  oklch(22% 0.010 250);
+    --border:     oklch(28% 0.010 250);
+    --border-2:   oklch(34% 0.010 250);
+    --text:       oklch(92% 0.008 250);
+    --text-2:     oklch(62% 0.010 250);
+    --text-3:     oklch(42% 0.010 250);
+    --amber:      oklch(72% 0.12 95);
+    --amber-dim:  oklch(72% 0.12 95 / 0.15);
+    --amber-dim2: oklch(72% 0.12 95 / 0.08);
+    --green:      oklch(68% 0.14 155);
+    --green-dim:  oklch(68% 0.14 155 / 0.12);
+    --red:        oklch(62% 0.14 25);
+    --ff-ui:   'Bricolage Grotesque', sans-serif;
+    --ff-body: 'Spectral', Georgia, serif;
+    --ff-mono: 'Azeret Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ff-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 32px;
+  }
+
+  h1 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 4px;
+    font-family: var(--ff-mono);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 28px;
+    font-family: var(--ff-ui);
+    font-weight: 300;
+  }
+
+  /* ── App shell ── */
+  .app {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 980px;
+    background: var(--bg);
+  }
+
+  /* topnav */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    height: 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--ff-ui);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--amber); }
+  .nav-sep { width: 1px; height: 16px; background: var(--border-2); }
+  .nav-label { font-family: var(--ff-mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.05em; }
+  .nav-spacer { flex: 1; }
+  .nav-toggle { display: flex; gap: 2px; }
+  .toggle-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    color: var(--text-3);
+    background: transparent;
+  }
+  .toggle-btn.active {
+    color: var(--text);
+    background: var(--surface-2);
+    border-color: var(--border-2);
+  }
+
+  /* query bar */
+  .querybar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .query-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 12px;
+    font-family: var(--ff-ui);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+  }
+  .query-input:focus { border-color: var(--amber); }
+  .query-btn {
+    padding: 7px 14px;
+    background: var(--amber-dim2);
+    border: 1px solid var(--amber);
+    border-radius: 5px;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* main layout */
+  .main { display: flex; height: 420px; }
+
+  /* tree panel */
+  .tree-panel {
+    width: 256px;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    overflow-y: auto;
+    padding: 10px 0;
+    flex-shrink: 0;
+  }
+  .tree-header {
+    padding: 0 12px 8px;
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .tree-node {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .tree-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    user-select: none;
+  }
+  .tree-row:hover { background: var(--surface); }
+  .tree-row.selected { background: var(--amber-dim2); }
+  .tree-row.selected .node-label { color: var(--amber); }
+
+  .node-indicator {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+  }
+  .node-indicator.done { color: var(--green); }
+  .node-indicator.active { color: var(--amber); animation: pulse 1.4s ease-in-out infinite; }
+  .node-indicator.queued { color: var(--text-3); }
+  .node-indicator.root { color: var(--amber); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+  .node-label {
+    font-family: var(--ff-ui);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-2);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .node-meta {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  .tree-children { padding-left: 14px; border-left: 1px solid var(--border); margin-left: 17px; }
+
+  /* detail panel */
+  .detail-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    background: var(--bg);
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .detail-badge {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .detail-title {
+    font-family: var(--ff-ui);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  .dive-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border-2);
+    border-radius: 5px;
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .dive-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  .section-label {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .section-block { margin-bottom: 20px; }
+
+  .summary-text {
+    font-family: var(--ff-body);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-2);
+    line-height: 1.75;
+    background: var(--surface);
+    padding: 12px 14px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+  }
+
+  .subq-list { display: flex; flex-direction: column; gap: 4px; }
+  .subq-item {
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .subq-item:hover { border-color: var(--border-2); color: var(--text); }
+  .subq-item::before { content: '↳'; font-family: var(--ff-mono); color: var(--text-3); font-size: 10px; }
+
+  .source-list { display: flex; flex-direction: column; gap: 6px; }
+  .source-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 12px;
+  }
+  .source-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .source-favicon {
+    width: 14px; height: 14px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+    color: var(--text-3);
+  }
+  .source-url {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--amber);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .source-score {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--green);
+  }
+  .source-excerpt {
+    font-family: var(--ff-body);
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-3);
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* status bar */
+  .statusbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    height: 32px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+  }
+  .status-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); animation: pulse 1.4s ease-in-out infinite; }
+  .status-sep { color: var(--border-2); }
+  .status-link { color: var(--amber); margin-left: auto; cursor: pointer; }
+  .status-link:hover { text-decoration: underline; }
+
+  /* layout section */
+  .page-header { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Bonsai — Frontend Design v2</h1>
+  <p class="subtitle">Precise · Deep · Calm &nbsp;·&nbsp; Bricolage Grotesque + Azeret Mono &nbsp;·&nbsp; Cool slate dark + amber accent</p>
+</div>
+
+<div class="app">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <span class="nav-logo">b<span>o</span>nsai</span>
+    <div class="nav-sep"></div>
+    <span class="nav-label">deep research</span>
+    <div class="nav-spacer"></div>
+    <div class="nav-toggle">
+      <button class="toggle-btn active">⊞ TREE</button>
+      <button class="toggle-btn">◈ GRAPH</button>
+    </div>
+  </nav>
+
+  <!-- Query bar -->
+  <div class="querybar">
+    <input class="query-input" value="What are the long-term economic effects of remote work on major cities?" readonly>
+    <button class="query-btn">RESEARCH →</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Tree -->
+    <div class="tree-panel">
+      <div class="tree-header">Research Tree</div>
+
+      <!-- Root -->
+      <div class="tree-node">
+        <div class="tree-row">
+          <span class="node-indicator root">◉</span>
+          <span class="node-label" style="color:var(--text);font-weight:500">Remote work economics</span>
+          <span class="node-meta">4br</span>
+        </div>
+
+        <div class="tree-children">
+
+          <!-- Branch 1: selected -->
+          <div class="tree-node">
+            <div class="tree-row selected">
+              <span class="node-indicator done">✓</span>
+              <span class="node-label">Urban real estate markets</span>
+              <span class="node-meta">6s</span>
+            </div>
+            <div class="tree-children">
+              <div class="tree-node">
+                <div class="tree-row">
+                  <span class="node-indicator done">✓</span>
+                  <span class="node-label">Office vacancy rates</span>
+                  <span class="node-meta">4s</span>
+                </div>
+              </div>
+              <div class="tree-node">
+                <div class="tree-row">
+                  <span class="node-indicator done">✓</span>
+                  <span class="node-label">Suburban migration</span>
+                  <span class="node-meta">3s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branch 2: active -->
+          <div class="tree-node">
+            <div class="tree-row">
+              <span class="node-indicator active">⟳</span>
+              <span class="node-label">Tax revenue &amp; city budgets</span>
+              <span class="node-meta">—</span>
+            </div>
+          </div>
+
+          <!-- Branch 3: done -->
+          <div class="tree-node">
+            <div class="tree-row">
+              <span class="node-indicator done">✓</span>
+              <span class="node-label">Labor market geography</span>
+              <span class="node-meta">5s</span>
+            </div>
+            <div class="tree-children">
+              <div class="tree-node">
+                <div class="tree-row">
+                  <span class="node-indicator done">✓</span>
+                  <span class="node-label">Wage compression</span>
+                  <span class="node-meta">3s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branch 4: queued -->
+          <div class="tree-node">
+            <div class="tree-row">
+              <span class="node-indicator queued">○</span>
+              <span class="node-label">Retail &amp; hospitality</span>
+              <span class="node-meta">—</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="detail-panel">
+
+      <div class="detail-header">
+        <div>
+          <div class="detail-badge">Branch · Depth 1 · Complete</div>
+          <div class="detail-title">Urban real estate markets</div>
+        </div>
+        <button class="dive-btn">+ DIVE DEEPER</button>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label">Summary</div>
+        <div class="summary-text">
+          Remote work has fundamentally altered urban real estate dynamics. Office vacancy in major metros reached historic highs — 22.7% in Manhattan, 28% in San Francisco — while suburban residential prices surged 34% from 2020–2024. Cities are now pursuing commercial-to-residential conversion, but progress is constrained by zoning restrictions and structural incompatibility of office floorplates.
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label">Sub-questions explored</div>
+        <div class="subq-list">
+          <div class="subq-item">Office vacancy rates in major metros post-2020</div>
+          <div class="subq-item">Suburban residential migration &amp; price trends</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label">Sources (6)</div>
+        <div class="source-list">
+
+          <div class="source-card">
+            <div class="source-top">
+              <div class="source-favicon">N</div>
+              <span class="source-url">nytimes.com · Office Vacancy Crisis Deepens...</span>
+              <span class="source-score">0.94</span>
+            </div>
+            <div class="source-excerpt">"Manhattan office availability hit 22.7% in Q3 2024, the highest rate since records began in the 1980s. Landlords are offering unprecedented concessions..."</div>
+          </div>
+
+          <div class="source-card">
+            <div class="source-top">
+              <div class="source-favicon">B</div>
+              <span class="source-url">brookings.edu · Remote Work &amp; Urban Displacement</span>
+              <span class="source-score">0.91</span>
+            </div>
+            <div class="source-excerpt">"Suburban counties within 50 miles of major metros saw net population inflows of 2.3M between 2020 and 2023, reversing a decade of urban consolidation..."</div>
+          </div>
+
+          <div class="source-card" style="opacity:0.55;cursor:pointer">
+            <div class="source-top">
+              <div class="source-favicon">+</div>
+              <span class="source-url" style="color:var(--text-3)">4 more sources</span>
+              <span style="font-family:var(--ff-mono);font-size:10px;color:var(--text-3)">expand</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <span class="status-dot"></span>
+    <span style="color:var(--text-2)">Researching</span>
+    <span class="status-sep">·</span>
+    <span>3 / 4 branches</span>
+    <span class="status-sep">·</span>
+    <span>18 sources</span>
+    <span class="status-sep">·</span>
+    <span>depth 2</span>
+    <a class="status-link">langsmith trace ↗</a>
+  </div>
+
+</div>
+
+<p style="font-family:'Azeret Mono',monospace;font-size:10px;color:oklch(42% 0.010 250);margin-top:20px;letter-spacing:0.05em">
+  Fonts: Bricolage Grotesque (UI) · Spectral (body/excerpts) · Azeret Mono (labels, scores, meta) &nbsp;·&nbsp; Color: oklch cool-slate dark + amber accent &nbsp;·&nbsp; Live HTML mockup
+</p>
+
+</body>
+</html>

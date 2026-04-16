@@ -1,0 +1,230 @@
+<h2>Design — Section 3: Frontend UI</h2>
+<p class="subtitle">Next.js app — split panel primary, live graph toggle. Click the mockup areas to explore.</p>
+
+<div class="mockup" style="margin-bottom:24px">
+  <div class="mockup-header">Full App Layout — Split Panel View (Primary)</div>
+  <div class="mockup-body" style="padding:0;overflow:hidden;font-size:12px;font-family:monospace">
+
+    <!-- Top nav -->
+    <div style="background:#161b22;padding:10px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:12px">
+      <span style="color:#58a6ff;font-weight:bold;font-size:13px">🌿 Bonsai</span>
+      <span style="color:#8b949e;font-size:11px">deep research</span>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:6px">
+        <div style="padding:4px 10px;background:#21262d;border-radius:4px;color:#e6edf3;font-size:11px;border:1px solid #30363d">⊞ Tree</div>
+        <div style="padding:4px 10px;background:#0d1117;border-radius:4px;color:#8b949e;font-size:11px;border:1px solid #30363d">◈ Graph</div>
+      </div>
+    </div>
+
+    <!-- Query bar -->
+    <div style="background:#0d1117;padding:12px 16px;border-bottom:1px solid #30363d;display:flex;gap:8px;align-items:center">
+      <div style="flex:1;padding:8px 12px;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#8b949e;font-size:12px">
+        What are the long-term economic effects of remote work on major cities?
+      </div>
+      <div style="padding:8px 16px;background:#238636;border-radius:6px;color:white;font-size:12px;white-space:nowrap">Research →</div>
+    </div>
+
+    <!-- Main split area -->
+    <div style="display:flex;height:380px">
+
+      <!-- Left: Tree panel -->
+      <div style="width:280px;border-right:1px solid #30363d;background:#0d1117;overflow-y:auto;padding:10px">
+        <div style="color:#8b949e;font-size:10px;font-weight:600;letter-spacing:0.08em;margin-bottom:8px">RESEARCH TREE</div>
+
+        <!-- Root -->
+        <div style="padding:6px 8px;background:#161b22;border-radius:4px;margin-bottom:4px;border-left:2px solid #58a6ff">
+          <div style="color:#58a6ff;font-size:11px;font-weight:600">◉ Root Query</div>
+          <div style="color:#8b949e;font-size:10px;margin-top:2px">4 branches · complete</div>
+        </div>
+
+        <!-- Branch 1 - selected -->
+        <div style="padding:6px 8px;background:#1c2128;border-radius:4px;margin:2px 0 2px 12px;border-left:2px solid #3fb950;cursor:pointer">
+          <div style="color:#3fb950;font-size:11px">✓ Urban real estate markets</div>
+          <div style="color:#8b949e;font-size:10px;margin-top:2px">6 sources · 2 sub-branches</div>
+        </div>
+
+        <!-- Sub-branch 1.1 -->
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;margin:2px 0 2px 24px;border-left:2px solid #3fb950;cursor:pointer">
+          <div style="color:#6e7681;font-size:10px">✓ Office vacancy rates</div>
+          <div style="color:#6e7681;font-size:9px;margin-top:1px">4 sources</div>
+        </div>
+
+        <!-- Sub-branch 1.2 -->
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;margin:2px 0 2px 24px;border-left:2px solid #3fb950;cursor:pointer">
+          <div style="color:#6e7681;font-size:10px">✓ Suburban migration patterns</div>
+          <div style="color:#6e7681;font-size:9px;margin-top:1px">3 sources</div>
+        </div>
+
+        <!-- Branch 2 - in progress -->
+        <div style="padding:6px 8px;background:#161b22;border-radius:4px;margin:2px 0 2px 12px;border-left:2px solid #f78166;cursor:pointer">
+          <div style="color:#f78166;font-size:11px">⟳ Tax revenue & city budgets</div>
+          <div style="color:#8b949e;font-size:10px;margin-top:2px">searching...</div>
+        </div>
+
+        <!-- Branch 3 -->
+        <div style="padding:6px 8px;background:#161b22;border-radius:4px;margin:2px 0 2px 12px;border-left:2px solid #3fb950;cursor:pointer">
+          <div style="color:#3fb950;font-size:11px">✓ Labor market changes</div>
+          <div style="color:#8b949e;font-size:10px;margin-top:2px">5 sources · 1 sub-branch</div>
+        </div>
+
+        <!-- Branch 4 - pending -->
+        <div style="padding:6px 8px;background:#161b22;border-radius:4px;margin:2px 0 2px 12px;border-left:2px solid #30363d;cursor:pointer">
+          <div style="color:#6e7681;font-size:11px">○ Retail & hospitality sector</div>
+          <div style="color:#6e7681;font-size:10px;margin-top:2px">queued</div>
+        </div>
+      </div>
+
+      <!-- Right: Node detail panel -->
+      <div style="flex:1;background:#0d1117;overflow-y:auto;padding:14px">
+
+        <!-- Selected node header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+          <div>
+            <div style="color:#3fb950;font-size:11px;font-weight:600;margin-bottom:4px">BRANCH · DEPTH 1 · COMPLETE</div>
+            <div style="color:#e6edf3;font-size:14px;font-weight:600">Urban real estate markets</div>
+          </div>
+          <div style="padding:6px 12px;background:#1c2128;border:1px solid #238636;border-radius:6px;color:#3fb950;font-size:11px;cursor:pointer;white-space:nowrap">
+            + Dive Deeper
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div style="padding:10px;background:#161b22;border-radius:6px;margin-bottom:12px">
+          <div style="color:#8b949e;font-size:10px;font-weight:600;margin-bottom:6px">SUMMARY</div>
+          <div style="color:#c9d1d9;font-size:12px;line-height:1.6">Remote work has fundamentally altered urban real estate dynamics. Office vacancy rates in major metros reached historic highs (22% in NYC, 28% in SF), while suburban residential prices surged 34% from 2020–2024. Cities are now converting commercial space to residential use, but this transition faces zoning and structural barriers...</div>
+        </div>
+
+        <!-- Sub-questions generated -->
+        <div style="margin-bottom:12px">
+          <div style="color:#8b949e;font-size:10px;font-weight:600;margin-bottom:6px">SUB-QUESTIONS EXPLORED</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#a5d6ff;font-size:11px;cursor:pointer">→ Office vacancy rates in major metros post-2020</div>
+            <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#a5d6ff;font-size:11px;cursor:pointer">→ Suburban residential migration & price trends</div>
+          </div>
+        </div>
+
+        <!-- Sources -->
+        <div>
+          <div style="color:#8b949e;font-size:10px;font-weight:600;margin-bottom:6px">SOURCES (6)</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="padding:8px 10px;background:#161b22;border-radius:6px;border:1px solid #30363d">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                <div style="width:14px;height:14px;background:#238636;border-radius:2px;font-size:8px;color:white;display:flex;align-items:center;justify-content:center">N</div>
+                <a style="color:#58a6ff;font-size:11px;text-decoration:none">nytimes.com · Office Vacancy Crisis...</a>
+                <span style="color:#3fb950;font-size:10px;margin-left:auto">0.94</span>
+              </div>
+              <div style="color:#8b949e;font-size:10px;line-height:1.5">"Manhattan office availability hit 22.7% in Q3 2024, the highest rate since records began in..."</div>
+            </div>
+            <div style="padding:8px 10px;background:#161b22;border-radius:6px;border:1px solid #30363d">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                <div style="width:14px;height:14px;background:#1f6feb;border-radius:2px;font-size:8px;color:white;display:flex;align-items:center;justify-content:center">B</div>
+                <a style="color:#58a6ff;font-size:11px;text-decoration:none">brookings.edu · Remote Work & Urban...</a>
+                <span style="color:#3fb950;font-size:10px;margin-left:auto">0.91</span>
+              </div>
+              <div style="color:#8b949e;font-size:10px;line-height:1.5">"Suburban counties within 50 miles of major metros saw net population inflows of 2.3M between..."</div>
+            </div>
+            <div style="padding:8px 10px;background:#161b22;border-radius:6px;border:1px solid #30363d;opacity:0.6">
+              <div style="color:#6e7681;font-size:10px;text-align:center">+ 4 more sources</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom status bar -->
+    <div style="background:#161b22;padding:6px 16px;border-top:1px solid #30363d;display:flex;align-items:center;gap:12px;font-size:10px;color:#8b949e">
+      <span style="color:#f78166">⟳ Researching...</span>
+      <span>3 / 4 branches complete</span>
+      <span>·</span>
+      <span>18 sources found</span>
+      <span>·</span>
+      <span>depth 2</span>
+      <div style="flex:1"></div>
+      <span style="color:#3fb950">LangSmith trace →</span>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Graph View (toggle) — React Flow, same data, different layout</div>
+  <div class="mockup-body" style="padding:0;background:#0d1117;height:220px;position:relative;overflow:hidden">
+    <svg width="100%" height="220" style="display:block">
+      <!-- Root node -->
+      <rect x="50%" y="16" width="120" height="34" rx="6" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5" transform="translate(-60,0)"/>
+      <text x="50%" y="29" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="monospace">Root Query</text>
+      <text x="50%" y="41" text-anchor="middle" fill="#8b949e" font-size="8" font-family="monospace">economic effects...</text>
+
+      <!-- Edges to level 1 -->
+      <line x1="20%" y1="50" x2="50%" y2="50" stroke="#30363d" stroke-width="1"/>
+      <line x1="50%" y1="50" x2="50%" y2="50" stroke="#30363d" stroke-width="1"/>
+      <line x1="80%" y1="50" x2="50%" y2="50" stroke="#30363d" stroke-width="1"/>
+      <line x1="20%" y1="50" x2="20%" y2="80" stroke="#30363d" stroke-width="1"/>
+      <line x1="40%" y1="50" x2="40%" y2="80" stroke="#30363d" stroke-width="1"/>
+      <line x1="62%" y1="50" x2="62%" y2="80" stroke="#f78166" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="82%" y1="50" x2="82%" y2="80" stroke="#30363d" stroke-width="1"/>
+
+      <!-- Level 1 nodes -->
+      <rect x="8%" y="80" width="100" height="30" rx="4" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="13%" y="93" fill="#3fb950" font-size="8" font-family="monospace">Urban real estate</text>
+      <text x="13%" y="103" fill="#8b949e" font-size="7" font-family="monospace">✓ 6 sources</text>
+
+      <rect x="29%" y="80" width="90" height="30" rx="4" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="33%" y="93" fill="#3fb950" font-size="8" font-family="monospace">Labor markets</text>
+      <text x="33%" y="103" fill="#8b949e" font-size="7" font-family="monospace">✓ 5 sources</text>
+
+      <!-- In progress node with pulse -->
+      <rect x="53%" y="80" width="88" height="30" rx="4" fill="#1c2128" stroke="#f78166" stroke-width="1.5"/>
+      <rect x="51%" y="78" width="92" height="34" rx="6" fill="none" stroke="#f78166" stroke-width="0.8" opacity="0.4"/>
+      <text x="57%" y="93" fill="#f78166" font-size="8" font-family="monospace">Tax revenue</text>
+      <text x="57%" y="103" fill="#f78166" font-size="7" font-family="monospace">⟳ searching</text>
+
+      <rect x="74%" y="80" width="90" height="30" rx="4" fill="#161b22" stroke="#30363d" stroke-width="1" opacity="0.5"/>
+      <text x="78%" y="93" fill="#6e7681" font-size="8" font-family="monospace">Retail sector</text>
+      <text x="78%" y="103" fill="#6e7681" font-size="7" font-family="monospace">○ queued</text>
+
+      <!-- Level 2 edges from real estate -->
+      <line x1="10%" y1="110" x2="10%" y2="140" stroke="#30363d" stroke-width="1"/>
+      <line x1="20%" y1="110" x2="20%" y2="140" stroke="#30363d" stroke-width="1"/>
+
+      <!-- Level 2 nodes -->
+      <rect x="3%" y="140" width="80" height="26" rx="3" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+      <text x="5%" y="152" fill="#6e7681" font-size="7" font-family="monospace">Office vacancies</text>
+      <text x="5%" y="161" fill="#6e7681" font-size="7" font-family="monospace">✓ 4 sources</text>
+
+      <rect x="13%" y="140" width="82" height="26" rx="3" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+      <text x="15%" y="152" fill="#6e7681" font-size="7" font-family="monospace">Suburban migration</text>
+      <text x="15%" y="161" fill="#6e7681" font-size="7" font-family="monospace">✓ 3 sources</text>
+
+      <!-- Level 2 from labor -->
+      <line x1="34%" y1="110" x2="34%" y2="140" stroke="#30363d" stroke-width="1"/>
+      <rect x="27%" y="140" width="80" height="26" rx="3" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+      <text x="29%" y="152" fill="#6e7681" font-size="7" font-family="monospace">Wage geography</text>
+      <text x="29%" y="161" fill="#6e7681" font-size="7" font-family="monospace">✓ 3 sources</text>
+    </svg>
+
+    <div style="position:absolute;bottom:8px;right:12px;font-size:10px;color:#8b949e;font-family:monospace">click node to inspect · scroll to zoom</div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px">
+  <div class="label">Component breakdown (Next.js)</div>
+  <div style="font-family:monospace;font-size:12px;background:#0d1117;border-radius:6px;padding:14px;margin-top:10px">
+    <div style="color:#e6edf3">app/</div>
+    <div style="padding-left:16px;color:#8b949e">page.tsx                  <span style="color:#6e7681">← QueryInput + ResearchPage layout</span></div>
+    <div style="padding-left:16px;color:#8b949e">components/</div>
+    <div style="padding-left:32px;color:#79c0ff">ResearchTree.tsx          <span style="color:#6e7681">← SSE consumer, builds node tree state</span></div>
+    <div style="padding-left:32px;color:#79c0ff">TreePanel.tsx             <span style="color:#6e7681">← collapsible left panel</span></div>
+    <div style="padding-left:32px;color:#79c0ff">NodeDetail.tsx            <span style="color:#6e7681">← right panel: summary, sources, dive deeper</span></div>
+    <div style="padding-left:32px;color:#79c0ff">GraphView.tsx             <span style="color:#6e7681">← React Flow graph (toggle view)</span></div>
+    <div style="padding-left:32px;color:#79c0ff">SourceCard.tsx            <span style="color:#6e7681">← individual source with excerpt + score</span></div>
+    <div style="padding-left:32px;color:#79c0ff">StatusBar.tsx             <span style="color:#6e7681">← branch count, source count, LangSmith link</span></div>
+    <div style="padding-left:16px;color:#8b949e">hooks/</div>
+    <div style="padding-left:32px;color:#ffa657">useResearchStream.ts      <span style="color:#6e7681">← EventSource hook, emits NodeEvent[]</span></div>
+    <div style="padding-left:32px;color:#ffa657">useResearchTree.ts        <span style="color:#6e7681">← builds tree structure from flat NodeEvent[]</span></div>
+    <div style="padding-left:16px;color:#8b949e">lib/</div>
+    <div style="padding-left:32px;color:#6e7681">types.ts                  ← NodeEvent, Source, BranchResult (shared with backend)</div>
+  </div>
+</div>
+
+<p style="font-size:13px;color:var(--text-secondary);margin-top:16px">Does this frontend design look right? Any changes before Section 4 (eval + project structure)?</p>

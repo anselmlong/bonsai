@@ -1,0 +1,97 @@
+<h2>Design — Section 2: State Schema & Node Events</h2>
+<p class="subtitle">The data structures that flow through the graph and stream to the frontend</p>
+
+<div class="section">
+  <div class="label">ResearchConfig — top-level settings, read-only throughout graph</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;overflow-x:auto;margin-top:10px"><code style="color:#e6edf3"><span style="color:#ff7b72">class</span> <span style="color:#ffa657">ResearchConfig</span>(TypedDict):
+    max_branches: <span style="color:#79c0ff">int</span>          <span style="color:#8b949e"># hard cap on sub-questions per level (default 5)</span>
+    max_depth:    <span style="color:#79c0ff">int</span>          <span style="color:#8b949e"># hard cap on recursion depth (default 2)</span>
+    planner_model:  <span style="color:#a5d6ff">str</span>        <span style="color:#8b949e"># e.g. "gpt-4o"</span>
+    researcher_model: <span style="color:#a5d6ff">str</span>      <span style="color:#8b949e"># e.g. "gpt-4o-mini"</span>
+    synthesizer_model: <span style="color:#a5d6ff">str</span>     <span style="color:#8b949e"># e.g. "gpt-4o"</span>
+    tavily_max_results: <span style="color:#79c0ff">int</span>    <span style="color:#8b949e"># results per Tavily call (default 5)</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">ResearchState — root graph state</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;overflow-x:auto;margin-top:10px"><code style="color:#e6edf3"><span style="color:#ff7b72">class</span> <span style="color:#ffa657">ResearchState</span>(TypedDict):
+    job_id:        <span style="color:#a5d6ff">str</span>
+    query:         <span style="color:#a5d6ff">str</span>
+    config:        ResearchConfig
+    sub_questions: <span style="color:#79c0ff">list</span>[<span style="color:#a5d6ff">str</span>]          <span style="color:#8b949e"># emitted by planner</span>
+    branches:      <span style="color:#79c0ff">list</span>[BranchResult]  <span style="color:#8b949e"># collected by reduce node</span>
+    final_answer:  <span style="color:#a5d6ff">str</span>                 <span style="color:#8b949e"># emitted by synthesizer</span>
+    events:        <span style="color:#79c0ff">Annotated</span>[<span style="color:#79c0ff">list</span>[NodeEvent], operator.add]  <span style="color:#8b949e"># append-only</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">BranchState — subgraph state (kept small — only what branch needs)</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;overflow-x:auto;margin-top:10px"><code style="color:#e6edf3"><span style="color:#ff7b72">class</span> <span style="color:#ffa657">BranchState</span>(TypedDict):
+    node_id:        <span style="color:#a5d6ff">str</span>               <span style="color:#8b949e"># unique ID for this branch node</span>
+    parent_id:      <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>        <span style="color:#8b949e"># None for root branches</span>
+    question:       <span style="color:#a5d6ff">str</span>               <span style="color:#8b949e"># the sub-question this branch answers</span>
+    parent_summary: <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>        <span style="color:#8b949e"># context from parent (not full state)</span>
+    depth:          <span style="color:#79c0ff">int</span>
+    config:         ResearchConfig
+    search_results: <span style="color:#79c0ff">list</span>[SearchResult]
+    sub_branches:   <span style="color:#79c0ff">list</span>[BranchResult]  <span style="color:#8b949e"># collected if recursed</span>
+    summary:        <span style="color:#a5d6ff">str</span>               <span style="color:#8b949e"># branch's synthesized answer</span>
+    sources:        <span style="color:#79c0ff">list</span>[Source]</code></pre>
+</div>
+
+<div class="section">
+  <div class="label">NodeEvent — every SSE message the frontend receives</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;overflow-x:auto;margin-top:10px"><code style="color:#e6edf3"><span style="color:#ff7b72">class</span> <span style="color:#ffa657">NodeEvent</span>(TypedDict):
+    type:      <span style="color:#79c0ff">Literal</span>[
+                 <span style="color:#a5d6ff">"research_started"</span>,    <span style="color:#8b949e"># job kicked off</span>
+                 <span style="color:#a5d6ff">"plan_complete"</span>,       <span style="color:#8b949e"># planner emitted sub_questions</span>
+                 <span style="color:#a5d6ff">"branch_started"</span>,      <span style="color:#8b949e"># BranchGraph began for a question</span>
+                 <span style="color:#a5d6ff">"branch_searching"</span>,    <span style="color:#8b949e"># Tavily call in progress</span>
+                 <span style="color:#a5d6ff">"branch_reflecting"</span>,   <span style="color:#8b949e"># reflect node deciding whether to recurse</span>
+                 <span style="color:#a5d6ff">"branch_spawning"</span>,     <span style="color:#8b949e"># recursing — child branches created</span>
+                 <span style="color:#a5d6ff">"branch_complete"</span>,     <span style="color:#8b949e"># branch finished, summary + sources ready</span>
+                 <span style="color:#a5d6ff">"synthesis_started"</span>,   <span style="color:#8b949e"># all branches done, synthesizer running</span>
+                 <span style="color:#a5d6ff">"research_complete"</span>,   <span style="color:#8b949e"># final answer ready</span>
+                 <span style="color:#a5d6ff">"error"</span>
+               ]
+    node_id:   <span style="color:#a5d6ff">str</span>
+    parent_id: <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>
+    depth:     <span style="color:#79c0ff">int</span>
+    question:  <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>
+    sources:   <span style="color:#79c0ff">list</span>[Source] | <span style="color:#79c0ff">None</span>    <span style="color:#8b949e"># present on branch_complete</span>
+    summary:   <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>            <span style="color:#8b949e"># present on branch_complete</span>
+    answer:    <span style="color:#a5d6ff">str</span> | <span style="color:#79c0ff">None</span>            <span style="color:#8b949e"># present on research_complete</span>
+    timestamp: <span style="color:#79c0ff">float</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">Source & BranchResult — leaf data types</div>
+  <pre style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;overflow-x:auto;margin-top:10px"><code style="color:#e6edf3"><span style="color:#ff7b72">class</span> <span style="color:#ffa657">Source</span>(TypedDict):
+    url:     <span style="color:#a5d6ff">str</span>
+    title:   <span style="color:#a5d6ff">str</span>
+    excerpt: <span style="color:#a5d6ff">str</span>
+    score:   <span style="color:#79c0ff">float</span>  <span style="color:#8b949e"># Tavily relevance score</span>
+
+<span style="color:#ff7b72">class</span> <span style="color:#ffa657">BranchResult</span>(TypedDict):
+    node_id:  <span style="color:#a5d6ff">str</span>
+    question: <span style="color:#a5d6ff">str</span>
+    summary:  <span style="color:#a5d6ff">str</span>
+    sources:  <span style="color:#79c0ff">list</span>[Source]
+    depth:    <span style="color:#79c0ff">int</span></code></pre>
+</div>
+
+<div class="section">
+  <div class="label">How the frontend reconstructs the tree from events alone</div>
+  <div style="background:#0d1117;border-radius:6px;padding:14px;font-size:12px;margin-top:10px;font-family:monospace">
+    <div style="color:#8b949e;margin-bottom:8px">// On each SSE message:</div>
+    <div style="color:#e6edf3">branch_started  → <span style="color:#3fb950">add node to tree</span> (parent_id tells us where)</div>
+    <div style="color:#e6edf3">branch_searching → <span style="color:#f78166">set node status = "searching"</span> (pulse animation)</div>
+    <div style="color:#e6edf3">branch_reflecting→ <span style="color:#f78166">set node status = "reflecting"</span></div>
+    <div style="color:#e6edf3">branch_spawning  → <span style="color:#79c0ff">show child nodes will appear</span></div>
+    <div style="color:#e6edf3">branch_complete  → <span style="color:#3fb950">set node status = "done"</span>, attach sources + summary</div>
+    <div style="color:#e6edf3">research_complete→ <span style="color:#3fb950">render final answer panel</span></div>
+    <div style="color:#8b949e;margin-top:8px">// No other state needed. node_id + parent_id = full tree structure.</div>
+  </div>
+</div>
+
+<p style="font-size:13px;color:var(--text-secondary);margin-top:16px">Does this state schema look right? Any fields to add or remove before we move to Section 3 (frontend UI design)?</p>

@@ -1,0 +1,83 @@
+<h2>Overall System Architecture — 3 Approaches</h2>
+<p class="subtitle">How the LangGraph agent graph, FastAPI, and Next.js frontend connect</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#0d1117;border-radius:6px;font-size:11px;font-family:monospace">
+      <div style="color:#8b949e;margin-bottom:6px">Sequential depth-first tree</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#58a6ff">① Planner Node → sub-questions [ Q1, Q2, Q3 ]</div>
+        <div style="color:#30363d;padding-left:20px">↓ one at a time</div>
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#79c0ff">② Researcher(Q1) → sources + maybe sub-Q</div>
+        <div style="color:#30363d;padding-left:20px">↓</div>
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#79c0ff">③ Researcher(Q1a) → deeper sources</div>
+        <div style="color:#30363d;padding-left:20px">↓ then Q2, Q3...</div>
+        <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#3fb950">④ Synthesizer → final answer</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sequential Depth-First</h3>
+      <p>Planner emits sub-questions; researcher handles them one at a time, recursing before moving to the next branch. Simple state machine, easy to reason about.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Easiest to implement and test</li><li>Predictable streaming order</li><li>Low token overhead</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Slow — no parallelism</li><li>Boring to watch in the UI</li><li>Doesn't showcase LangGraph well</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#0d1117;border-radius:6px;font-size:11px;font-family:monospace">
+      <div style="color:#8b949e;margin-bottom:6px">Parallel fan-out via LangGraph Send API</div>
+      <div style="color:#58a6ff;margin-bottom:4px">① Planner → Send(researcher, Q1) Send(researcher, Q2) Send(researcher, Q3)</div>
+      <div style="display:flex;gap:6px;margin-bottom:4px">
+        <div style="flex:1;padding:5px;background:#161b22;border-radius:4px;color:#79c0ff;text-align:center">R(Q1)<br/><span style="color:#f78166">⟳ live</span></div>
+        <div style="flex:1;padding:5px;background:#161b22;border-radius:4px;color:#79c0ff;text-align:center">R(Q2)<br/><span style="color:#f78166">⟳ live</span></div>
+        <div style="flex:1;padding:5px;background:#161b22;border-radius:4px;color:#79c0ff;text-align:center">R(Q3)<br/><span style="color:#f78166">⟳ live</span></div>
+      </div>
+      <div style="color:#30363d;text-align:center">↓ each can Send() sub-branches</div>
+      <div style="padding:5px 8px;background:#161b22;border-radius:4px;color:#3fb950;margin-top:4px;text-align:center">② Reducer collects all → Synthesizer</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Parallel Fan-Out (LangGraph Send)</h3>
+      <p>Uses LangGraph's native <code>Send</code> API to fan out to parallel researcher nodes. Each researcher can recursively <code>Send</code> sub-branches. A reducer waits for all branches before synthesis.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Fast — true parallelism</li><li>Live branching looks great in UI</li><li>Native LangGraph pattern</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Harder to control max depth</li><li>Reducer complexity</li><li>More tokens in flight simultaneously</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#0d1117;border-radius:6px;font-size:11px;font-family:monospace">
+      <div style="color:#8b949e;margin-bottom:6px">Hierarchical subgraphs — RECOMMENDED</div>
+      <div style="border:1px solid #30363d;border-radius:4px;padding:6px;margin-bottom:4px">
+        <div style="color:#58a6ff;margin-bottom:4px">ResearchGraph (root)</div>
+        <div style="padding-left:10px">
+          <div style="color:#79c0ff">planner → fan_out → reduce → synthesize</div>
+          <div style="border:1px dashed #30363d;border-radius:4px;padding:5px;margin-top:4px">
+            <div style="color:#a5d6ff">BranchGraph (subgraph, max_depth)</div>
+            <div style="padding-left:8px;color:#8b949e">search → reflect → recurse?</div>
+            <div style="padding-left:16px;border:1px dashed #21262d;border-radius:3px;padding:4px;margin-top:3px">
+              <div style="color:#6e7681">BranchGraph (depth+1)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="color:#3fb950">SSE stream: node_started, node_result, node_complete events</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hierarchical Subgraphs ⭐</h3>
+      <p>Root graph handles planner + synthesis. Each branch is a reusable <code>BranchGraph</code> subgraph that can recursively spawn child <code>BranchGraph</code>s up to <code>max_depth</code>. Every graph node emits typed SSE events the frontend consumes to build the live tree.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Clean separation of concerns</li><li>Reusable branch unit = easy to test</li><li>Depth control is explicit</li><li>Best interview architecture story</li><li>SSE events map 1:1 to UI nodes</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More upfront design work</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p style="font-size:13px;color:var(--text-secondary);margin-top:16px">
+  All 3 use FastAPI SSE → Next.js EventSource. The difference is purely in how the LangGraph graph is structured internally.
+</p>

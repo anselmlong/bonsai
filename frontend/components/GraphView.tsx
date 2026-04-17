@@ -39,7 +39,7 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
             <span className={styles.nodeStatus} style={{ color: STATUS_COLOR[n.status] }}>
               {n.status === "complete" ? "✓" : "⟳"}
             </span>
-            <span className={styles.nodeQuestion}>{n.question.slice(0, 50)}{n.question.length > 50 ? "…" : ""}</span>
+            <span className={styles.nodeQuestion}>{n.question.slice(0, 70)}{n.question.length > 70 ? "…" : ""}</span>
           </div>
         ),
         treeNode: n,
@@ -50,7 +50,7 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         borderRadius: "6px",
         color: "oklch(92% 0.008 250)",
         fontSize: "11px",
-        width: 180,
+        width: 220,
       },
     }));
 

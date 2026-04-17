@@ -68,7 +68,14 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
             </div>
           </>
         ) : (
-          <GraphView rootNodes={rootNodes} selectedId={selected?.id ?? null} onSelect={setSelected} />
+          <>
+            <GraphView rootNodes={rootNodes} selectedId={selected?.id ?? null} onSelect={setSelected} />
+            {selected && (
+              <div className={styles.graphDetailPane}>
+                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={setSelected} />
+              </div>
+            )}
+          </>
         )}
       </div>
 

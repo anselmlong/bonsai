@@ -3,13 +3,13 @@
   text-decoration: none;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 4px;
   padding: 10px 12px;
   transition: border-color 0.15s;
 }
 .card:hover { border-color: var(--border-2); }
 .top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.domain { font-family: var(--ff-mono); font-size: 10px; color: var(--amber); }
-.score { font-family: var(--ff-mono); font-size: 10px; color: var(--green); }
-.title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 4px; }
-.excerpt { font-family: var(--ff-body); font-size: 11px; font-style: italic; color: var(--text-3); line-height: 1.6; margin: 0; }
+.domain { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
+.score { font-size: 9px; letter-spacing: .06em; color: var(--green); }
+.title { font-size: 12px; font-weight: 400; color: var(--text-2); margin-bottom: 4px; }
+.excerpt { font-style: italic; font-size: 11px; font-weight: 300; color: var(--text-3); line-height: 1.65; margin: 0; }

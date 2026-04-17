@@ -1,0 +1,11 @@
+.worktrees/
+.env
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.next/
+dist/
+results/
+*.egg-info/
+.pytest_cache/

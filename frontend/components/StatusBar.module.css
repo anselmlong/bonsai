@@ -1,4 +1,4 @@
-.bar { display: flex; align-items: center; gap: 12px; padding: 0 16px; height: 32px; background: var(--surface); border-top: 1px solid var(--border); font-family: var(--ff-mono); font-size: 10px; color: var(--text-3); }
+.bar { display: flex; align-items: center; gap: 12px; padding: 0 16px; height: 30px; background: var(--surface); border-top: 1px solid var(--border); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
 .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .active { color: var(--text-2); }

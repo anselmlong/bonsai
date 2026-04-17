@@ -18,13 +18,17 @@ export function QueryInput({ variant }: QueryInputProps) {
     e.preventDefault();
     if (!query.trim()) return;
     setLoading(true);
-    const res = await fetch(`${API_BASE}/research`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
-    });
-    const { job_id } = await res.json();
-    router.push(`/research/${job_id}`);
+    try {
+      const res = await fetch(`${API_BASE}/research`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const { job_id } = await res.json();
+      router.push(`/research/${job_id}`);
+    } catch {
+      setLoading(false);
+    }
   };
 
   const isNav = variant === "nav";

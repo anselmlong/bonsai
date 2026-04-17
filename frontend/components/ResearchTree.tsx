@@ -6,6 +6,7 @@ import { useResearchTree } from "@/hooks/useResearchTree";
 import { TreePanel } from "./TreePanel";
 import { NodeDetail } from "./NodeDetail";
 import { StatusBar } from "./StatusBar";
+import { QueryInput } from "./QueryInput";
 import type { TreeNode } from "@/lib/types";
 import styles from "./ResearchTree.module.css";
 
@@ -35,7 +36,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
       <nav className={styles.nav}>
         <span className={styles.logo}>b<span>o</span>nsai</span>
         <span className={styles.navSep} />
-        <span className={styles.navLabel}>deep research</span>
+        <QueryInput variant="nav" />
         <div className={styles.navSpacer} />
         <div className={styles.toggle}>
           <button

@@ -2,9 +2,7 @@
 .nav { display: flex; align-items: center; gap: 16px; padding: 0 16px; height: 40px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .logo { font-weight: 600; font-size: 13px; letter-spacing: -.02em; }
 .logo span { color: var(--amber); }
-.navSep { width: 1px; height: 16px; background: var(--border-2); }
-.navLabel { font-family: var(--ff-mono); font-size: 10px; color: var(--text-3); letter-spacing: .05em; }
-.navSpacer { flex: 1; }
+.navSep { width: 1px; height: 16px; background: var(--border-2); }.navSpacer { flex: 1; }
 .toggle { display: flex; gap: 2px; }
 .toggleBtn { padding: 4px 10px; border-radius: 4px; font-family: var(--ff-mono); font-size: 10px; letter-spacing: .04em; border: 1px solid transparent; color: var(--text-3); background: transparent; }
 .toggleBtn.active { color: var(--text); background: var(--surface-2); border-color: var(--border-2); }

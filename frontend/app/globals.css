@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&family=Azeret+Mono:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          oklch(14% 0.012 250);
+  --surface:     oklch(18% 0.010 250);
+  --surface-2:   oklch(22% 0.010 250);
+  --border:      oklch(28% 0.010 250);
+  --border-2:    oklch(34% 0.010 250);
+  --text:        oklch(92% 0.008 250);
+  --text-2:      oklch(62% 0.010 250);
+  --text-3:      oklch(42% 0.010 250);
+  --amber:       oklch(72% 0.12 95);
+  --amber-dim:   oklch(72% 0.12 95 / 0.15);
+  --amber-dim2:  oklch(72% 0.12 95 / 0.08);
+  --green:       oklch(68% 0.14 155);
+  --red:         oklch(62% 0.14 25);
+  --ff-ui:   'Bricolage Grotesque', sans-serif;
+  --ff-body: 'Spectral', Georgia, serif;
+  --ff-mono: 'Azeret Mono', monospace;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--ff-ui); }
+button { font-family: var(--ff-ui); cursor: pointer; }

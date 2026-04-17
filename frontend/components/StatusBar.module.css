@@ -1,0 +1,8 @@
+.bar { display: flex; align-items: center; gap: 12px; padding: 0 16px; height: 32px; background: var(--surface); border-top: 1px solid var(--border); font-family: var(--ff-mono); font-size: 10px; color: var(--text-3); }
+.dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.active { color: var(--text-2); }
+.done { color: var(--green); }
+.sep { color: var(--border-2); }
+.trace { color: var(--amber); margin-left: auto; text-decoration: none; }
+.trace:hover { text-decoration: underline; }

@@ -53,4 +53,4 @@
 }
 .btnNav:hover { border-color: var(--amber); color: var(--amber); }
 
-.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btnHero:disabled, .btnNav:disabled { opacity: .5; cursor: not-allowed; }

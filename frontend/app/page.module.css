@@ -1,4 +1,4 @@
-.main { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; padding: 24px; }
-.logo { font-size: 32px; font-weight: 600; letter-spacing: -.03em; }
+.main { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; padding: 24px; }
+.logo { font-style: italic; font-size: 48px; font-weight: 400; letter-spacing: -.02em; color: var(--text); }
 .logo span { color: var(--amber); }
-.sub { font-family: var(--ff-mono); font-size: 11px; color: var(--text-3); letter-spacing: .06em; margin-bottom: 16px; }
+.sub { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }

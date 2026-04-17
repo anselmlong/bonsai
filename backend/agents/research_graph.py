@@ -61,6 +61,4 @@ async def run_research(
         answer=final_answer, timestamp=time.time(),
     ))
 
-    await event_queue.put(None)  # sentinel — signals SSE stream to close
-
     return {"branches": branches, "final_answer": final_answer}

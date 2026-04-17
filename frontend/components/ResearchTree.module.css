@@ -1,15 +1,15 @@
 .shell { display: flex; flex-direction: column; height: 100vh; background: var(--bg); }
-.nav { display: flex; align-items: center; gap: 16px; padding: 0 16px; height: 40px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.logo { font-weight: 600; font-size: 13px; letter-spacing: -.02em; }
+.nav { display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 44px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.logo { font-style: italic; font-weight: 400; font-size: 16px; letter-spacing: -.01em; }
 .logo span { color: var(--amber); }
-.navSep { width: 1px; height: 16px; background: var(--border-2); }.navSpacer { flex: 1; }
+.navSep { width: 1px; height: 16px; background: var(--border); }.navSpacer { flex: 1; }
 .toggle { display: flex; gap: 2px; }
-.toggleBtn { padding: 4px 10px; border-radius: 4px; font-family: var(--ff-mono); font-size: 10px; letter-spacing: .04em; border: 1px solid transparent; color: var(--text-3); background: transparent; }
-.toggleBtn.active { color: var(--text); background: var(--surface-2); border-color: var(--border-2); }
+.toggleBtn { padding: 4px 12px; border-radius: 3px; font-family: var(--ff-ui); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; border: 1px solid transparent; color: var(--text-3); background: transparent; }
+.toggleBtn.active { color: var(--text); background: var(--bg); border-color: var(--border); }
 .main { display: flex; flex: 1; overflow: hidden; }
 .detail { flex: 1; overflow: hidden; }
 .answer { padding: 24px; }
-.answerLabel { font-family: var(--ff-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
-.answerText { font-family: var(--ff-body); font-size: 14px; font-weight: 300; color: var(--text-2); line-height: 1.8; max-width: 65ch; }
-.placeholder { display: flex; align-items: center; justify-content: center; height: 100%; font-family: var(--ff-mono); font-size: 11px; color: var(--text-3); }
+.answerLabel { font-size: 8px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+.answerText { font-family: var(--ff-body); font-size: 14px; font-weight: 300; color: var(--text-2); line-height: 1.85; max-width: 65ch; }
+.placeholder { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
 .graphDetailPane { width: 420px; flex-shrink: 0; overflow: hidden; border-left: 1px solid var(--border); }

@@ -12,7 +12,7 @@ interface NodeDetailProps {
   onSelect: (node: TreeNode) => void;
 }
 
-export function NodeDetail({ node, jobId, allNodes, onSelect }: NodeDetailProps) {
+export function NodeDetail({ node, jobId, onSelect }: NodeDetailProps) {
   const subNodes = node.children;
 
   const handleDiveDeeper = async () => {

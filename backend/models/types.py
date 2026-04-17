@@ -41,6 +41,7 @@ class BranchResult(TypedDict):
     summary: str
     sources: list[Source]
     depth: int
+    sub_branches: list
 
 
 class NodeEvent(TypedDict):

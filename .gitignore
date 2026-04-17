@@ -9,3 +9,4 @@ dist/
 results/
 *.egg-info/
 .pytest_cache/
+.superpowers/

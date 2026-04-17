@@ -23,7 +23,11 @@ export function useResearchStream(jobId: string | null) {
       try {
         const event: NodeEvent = JSON.parse(e.data);
         setEvents((prev) => [...prev, event]);
-        if (event.type === "research_complete" || event.type === "error") {
+        if (event.type === "research_complete") {
+          setDone(true);
+          // Keep EventSource open — dive-deeper events arrive on the same stream
+        }
+        if (event.type === "error") {
           setDone(true);
           es.close();
         }

@@ -1,4 +1,4 @@
 .container { flex: 1; min-width: 0; height: 100%; }
 .nodeLabel { display: flex; flex-direction: column; gap: 3px; padding: 2px; }
-.nodeStatus { font-family: var(--ff-mono); font-size: 10px; }
-.nodeQuestion { font-family: var(--ff-ui); font-size: 11px; font-weight: 400; line-height: 1.3; }
+.nodeStatus { font-size: 10px; }
+.nodeQuestion { font-family: var(--ff-ui); font-style: italic; font-size: 11px; font-weight: 400; line-height: 1.3; }

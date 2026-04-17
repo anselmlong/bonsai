@@ -9,12 +9,12 @@ import type { TreeNode } from "@/lib/types";
 import styles from "./GraphView.module.css";
 
 const STATUS_COLOR: Record<TreeNode["status"], string> = {
-  pending: "#374151",
-  searching: "oklch(72% 0.12 95)",
-  reflecting: "oklch(72% 0.12 95)",
-  spawning: "oklch(72% 0.12 95)",
-  complete: "oklch(68% 0.14 155)",
-  error: "oklch(62% 0.14 25)",
+  pending: "#c0b8a8",
+  searching: "#3d6b4a",
+  reflecting: "#3d6b4a",
+  spawning: "#3d6b4a",
+  complete: "#3d6b4a",
+  error: "#8b3a2a",
 };
 
 function flattenNodes(nodes: TreeNode[]): TreeNode[] {
@@ -45,10 +45,10 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         treeNode: n,
       },
       style: {
-        background: "oklch(18% 0.010 250)",
-        border: `1px solid ${selectedId === n.id ? "oklch(72% 0.12 95)" : "oklch(28% 0.010 250)"}`,
+        background: "#ece6d8",
+        border: `1px solid ${selectedId === n.id ? "#3d6b4a" : "#d4c8b4"}`,
         borderRadius: "6px",
-        color: "oklch(92% 0.008 250)",
+        color: "#2a2418",
         fontSize: "11px",
         width: 220,
       },
@@ -60,7 +60,7 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         id: `${n.parentId}-${n.id}`,
         source: n.parentId!,
         target: n.id,
-        style: { stroke: "oklch(28% 0.010 250)" },
+        style: { stroke: "#d4c8b4" },
         animated: n.status !== "complete",
       }));
 
@@ -74,9 +74,9 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         edges={rfEdges}
         onNodeClick={(_, node) => onSelect((node.data as { treeNode: TreeNode }).treeNode)}
         fitView
-        colorMode="dark"
+        colorMode="light"
       >
-        <Background color="oklch(22% 0.010 250)" gap={16} />
+        <Background color="#e0d8c8" gap={16} />
         <Controls />
         <MiniMap nodeColor={(n) => STATUS_COLOR[(n.data as { treeNode: TreeNode }).treeNode.status]} />
       </ReactFlow>

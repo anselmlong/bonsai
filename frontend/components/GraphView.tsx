@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import {
-  ReactFlow, Background, Controls, MiniMap,
+  ReactFlow, Background,
   type Node, type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -17,8 +17,31 @@ const STATUS_COLOR: Record<TreeNode["status"], string> = {
   error: "#8b3a2a",
 };
 
+const COL_WIDTH = 240;
+const ROW_HEIGHT = 130;
+
 function flattenNodes(nodes: TreeNode[]): TreeNode[] {
   return nodes.flatMap((n) => [n, ...flattenNodes(n.children)]);
+}
+
+function computePositions(roots: TreeNode[]): Map<string, { x: number; y: number }> {
+  const positions = new Map<string, { x: number; y: number }>();
+  let leaf = 0;
+
+  function place(node: TreeNode): number {
+    if (node.children.length === 0) {
+      const col = leaf++;
+      positions.set(node.id, { x: col * COL_WIDTH, y: node.depth * ROW_HEIGHT });
+      return col;
+    }
+    const childCols = node.children.map(place);
+    const col = (childCols[0] + childCols[childCols.length - 1]) / 2;
+    positions.set(node.id, { x: col * COL_WIDTH, y: node.depth * ROW_HEIGHT });
+    return col;
+  }
+
+  roots.forEach(place);
+  return positions;
 }
 
 interface GraphViewProps {
@@ -30,16 +53,20 @@ interface GraphViewProps {
 export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
   const { rfNodes, rfEdges } = useMemo(() => {
     const all = flattenNodes(rootNodes);
-    const rfNodes: Node[] = all.map((n, i) => ({
+    const positions = computePositions(rootNodes);
+
+    const rfNodes: Node[] = all.map((n) => ({
       id: n.id,
-      position: { x: (i % 4) * 220, y: n.depth * 140 },
+      position: positions.get(n.id) ?? { x: 0, y: 0 },
       data: {
         label: (
           <div className={styles.nodeLabel}>
             <span className={styles.nodeStatus} style={{ color: STATUS_COLOR[n.status] }}>
               {n.status === "complete" ? "✓" : "⟳"}
             </span>
-            <span className={styles.nodeQuestion}>{n.question.slice(0, 70)}{n.question.length > 70 ? "…" : ""}</span>
+            <span className={styles.nodeQuestion}>
+              {n.question.slice(0, 70)}{n.question.length > 70 ? "…" : ""}
+            </span>
           </div>
         ),
         treeNode: n,
@@ -47,10 +74,10 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
       style: {
         background: "#ece6d8",
         border: `1px solid ${selectedId === n.id ? "#3d6b4a" : "#d4c8b4"}`,
-        borderRadius: "6px",
+        borderRadius: "4px",
         color: "#2a2418",
         fontSize: "11px",
-        width: 220,
+        width: 200,
       },
     }));
 
@@ -75,10 +102,9 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         onNodeClick={(_, node) => onSelect((node.data as { treeNode: TreeNode }).treeNode)}
         fitView
         colorMode="light"
+        proOptions={{ hideAttribution: true }}
       >
         <Background color="#e0d8c8" gap={16} />
-        <Controls />
-        <MiniMap nodeColor={(n) => STATUS_COLOR[(n.data as { treeNode: TreeNode }).treeNode.status]} />
       </ReactFlow>
     </div>
   );

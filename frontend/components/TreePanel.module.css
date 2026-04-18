@@ -1,12 +1,14 @@
 .panel { width: 220px; border-right: 1px solid var(--border); overflow-y: auto; padding: 10px 0; flex-shrink: 0; background: var(--surface); }
 .header { padding: 0 14px 10px; font-size: 8px; letter-spacing: .18em; color: var(--text-3); text-transform: uppercase; }
-.nodeWrap { display: flex; flex-direction: column; }
+.nodeWrap { display: flex; flex-direction: column; animation: nodeEnter 0.18s cubic-bezier(0,0,0.2,1) both; }
+@keyframes nodeEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .row { display: flex; align-items: center; gap: 8px; padding: 6px 14px; cursor: pointer; user-select: none; }
 .row:hover { background: var(--surface-2); }
 .selected { background: var(--amber-dim2) !important; }
 .selected .label { color: var(--amber); }
 .indicator { font-size: 10px; width: 12px; text-align: center; flex-shrink: 0; }
-.complete { color: var(--green); }
+.complete { color: var(--green); animation: indicatorPop 0.25s cubic-bezier(0.18,1.4,0.4,1) both; }
+@keyframes indicatorPop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 .searching, .reflecting, .spawning { color: var(--amber); opacity: .65; }
 .pending { color: var(--text-3); }
 .error { color: var(--red); }

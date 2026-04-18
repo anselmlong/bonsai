@@ -26,7 +26,9 @@
   text-transform: uppercase;
   color: var(--bg);
   white-space: nowrap;
+  transition: transform 0.1s, opacity 0.15s;
 }
+.btnHero:not(:disabled):active { transform: translateY(1px); }
 
 /* Nav */
 .formNav { align-items: center; }
@@ -53,7 +55,9 @@
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-3);
+  transition: border-color 0.15s, color 0.15s, transform 0.1s;
 }
 .btnNav:hover { border-color: var(--amber); color: var(--amber); }
+.btnNav:not(:disabled):active { transform: translateY(1px); }
 
 .btnHero:disabled, .btnNav:disabled { opacity: .5; cursor: not-allowed; }

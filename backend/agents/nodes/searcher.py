@@ -14,7 +14,7 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
         Source(
             url=r.get("url", ""),
             title=r.get("title", ""),
-            excerpt=r.get("content", "")[:500],
+            excerpt=r.get("content", ""),
             score=r.get("score", 0.0),
         )
         for r in response.get("results", [])

@@ -11,10 +11,10 @@ class Settings(BaseSettings):
 
     default_planner_model: str = "gpt-4o"
     default_researcher_model: str = "gpt-4o-mini"
-    default_synthesizer_model: str = "gpt-4o"
-    default_max_branches: int = 5
-    default_max_depth: int = 2
-    default_tavily_max_results: int = 5
+    default_synthesizer_model: str = "gpt-5-mini-2025-08-07"
+    default_max_branches: int = 3
+    default_max_depth: int = 1
+    default_tavily_max_results: int = 2
 
     def research_config(self) -> ResearchConfig:
         return ResearchConfig(

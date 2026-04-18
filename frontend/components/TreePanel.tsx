@@ -34,6 +34,7 @@ function TreeRow({
         onClick={() => onSelect(node)}
       >
         <span
+          key={node.status}
           className={`${styles.indicator} ${styles[node.status]} ${isActive ? styles.pulse : ""}`}
         >
           {STATUS_INDICATOR[node.status]}

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
 import { useResearchStream } from "@/hooks/useResearchStream";
 import { useResearchTree } from "@/hooks/useResearchTree";
 import { TreePanel } from "./TreePanel";
@@ -25,6 +26,15 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
   const { rootNodes, nodeMap, finalAnswer } = useResearchTree(events);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("tree");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!finalAnswer) return;
+    navigator.clipboard.writeText(finalAnswer).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   const selected = selectedId ? (nodeMap.get(selectedId) ?? null) : null;
 
@@ -33,7 +43,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
   const sourceCount = allNodes.reduce((sum, n) => sum + n.sources.length, 0);
   const maxDepth = allNodes.reduce((max, n) => Math.max(max, n.depth), 0);
 
-  const handleSelect = (node: TreeNode) => setSelectedId(node.id);
+  const handleSelect = (node: TreeNode) => setSelectedId((prev) => (prev === node.id ? null : node.id));
 
   return (
     <div className={styles.shell}>
@@ -59,17 +69,38 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
           <>
             <TreePanel nodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
             <div className={styles.detail}>
-              {finalAnswer && (
+              {selected ? (
+                <>
+                  {finalAnswer && (
+                    <div className={styles.backBar}>
+                      <button className={styles.backBtn} onClick={() => setSelectedId(null)}>
+                        ← Summary
+                      </button>
+                    </div>
+                  )}
+                  <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={handleSelect} />
+                </>
+              ) : finalAnswer ? (
                 <div className={styles.answer}>
-                  <div className={styles.answerLabel}>Final Answer</div>
-                  <p className={styles.answerText}>{finalAnswer}</p>
+                  <div className={styles.answerHeader}>
+                    <div className={styles.answerLabel}>Final Answer</div>
+                    <button
+                      className={`${styles.copyBtn} ${copied ? styles.copied : ""}`}
+                      onClick={handleCopy}
+                    >
+                      {copied ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+                  <div className={styles.answerText}>
+                    <ReactMarkdown>{finalAnswer}</ReactMarkdown>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.placeholder}>
+                  <span className={styles.placeholderArrow}>←</span>
+                  Select a branch to inspect it
                 </div>
               )}
-              {selected ? (
-                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={handleSelect} />
-              ) : !finalAnswer ? (
-                <div className={styles.placeholder}>Select a branch to inspect it.</div>
-              ) : null}
             </div>
           </>
         ) : (

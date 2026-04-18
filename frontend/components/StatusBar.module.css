@@ -2,7 +2,8 @@
 .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .active { color: var(--text-2); }
-.done { color: var(--green); }
+.done { color: var(--green); animation: doneIn 0.3s cubic-bezier(0,0,0.2,1) both; }
+@keyframes doneIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 .sep { color: var(--border-2); }
 .trace { color: var(--amber); margin-left: auto; text-decoration: none; }
 .trace:hover { text-decoration: underline; }

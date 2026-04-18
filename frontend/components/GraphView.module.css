@@ -1,4 +1,7 @@
 .container { flex: 1; min-width: 0; height: 100%; }
+/* Strip React Flow's default node border so our inline border is the only one */
+.container :global(.react-flow__node-default) { border: none; padding: 0; box-shadow: none; }
+.container :global(.react-flow__attribution) { display: none; }
 .nodeLabel { display: flex; flex-direction: column; gap: 3px; padding: 2px; }
 .nodeStatus { font-size: 10px; }
 .nodeQuestion { font-family: var(--ff-ui); font-style: italic; font-size: 11px; font-weight: 400; line-height: 1.3; }

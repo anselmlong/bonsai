@@ -23,5 +23,11 @@ After answering many design questions, I approved the spec document and Claude w
 
 The first iteration turned out better than expected! After adding my API keys, and fixing some small bug, the program worked as intended. However, I wasn't satisfied with the way it looked and the results. The different agents were giving their own summaries but there wasn't any consolidation of answers.
 
+I wrote some feedback and bugs in a markdown file and asked Claude to iterate on that again.
+
+## Iteration 2 
+
+This turned out pretty well, a light editorial aesthetic with trees and nodes.
+
 
 

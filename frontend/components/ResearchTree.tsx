@@ -23,13 +23,17 @@ interface ResearchTreeProps {
 export function ResearchTree({ jobId }: ResearchTreeProps) {
   const { events, done } = useResearchStream(jobId);
   const { rootNodes, nodeMap, finalAnswer } = useResearchTree(events);
-  const [selected, setSelected] = useState<TreeNode | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("tree");
+
+  const selected = selectedId ? (nodeMap.get(selectedId) ?? null) : null;
 
   const allNodes = [...nodeMap.values()];
   const completeCount = allNodes.filter((n) => n.status === "complete").length;
   const sourceCount = allNodes.reduce((sum, n) => sum + n.sources.length, 0);
   const maxDepth = allNodes.reduce((max, n) => Math.max(max, n.depth), 0);
+
+  const handleSelect = (node: TreeNode) => setSelectedId(node.id);
 
   return (
     <div className={styles.shell}>
@@ -53,26 +57,27 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
       <div className={styles.main}>
         {view === "tree" ? (
           <>
-            <TreePanel nodes={rootNodes} selectedId={selected?.id ?? null} onSelect={setSelected} />
+            <TreePanel nodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
             <div className={styles.detail}>
-              {selected ? (
-                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={setSelected} />
-              ) : finalAnswer ? (
+              {finalAnswer && (
                 <div className={styles.answer}>
                   <div className={styles.answerLabel}>Final Answer</div>
                   <p className={styles.answerText}>{finalAnswer}</p>
                 </div>
-              ) : (
-                <div className={styles.placeholder}>Select a branch to inspect it.</div>
               )}
+              {selected ? (
+                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={handleSelect} />
+              ) : !finalAnswer ? (
+                <div className={styles.placeholder}>Select a branch to inspect it.</div>
+              ) : null}
             </div>
           </>
         ) : (
           <>
-            <GraphView rootNodes={rootNodes} selectedId={selected?.id ?? null} onSelect={setSelected} />
+            <GraphView rootNodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
             {selected && (
               <div className={styles.graphDetailPane}>
-                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={setSelected} />
+                <NodeDetail node={selected} jobId={jobId} allNodes={nodeMap} onSelect={handleSelect} />
               </div>
             )}
           </>

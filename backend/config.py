@@ -28,3 +28,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+import os as _os
+if settings.openai_api_key:
+    _os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
+if settings.tavily_api_key:
+    _os.environ.setdefault("TAVILY_API_KEY", settings.tavily_api_key)
+if settings.langsmith_api_key:
+    _os.environ.setdefault("LANGSMITH_API_KEY", settings.langsmith_api_key)

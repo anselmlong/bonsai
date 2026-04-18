@@ -16,3 +16,12 @@ I decided to do a tree research system, with parallel LLM calls along with LLM c
 After that, I used `/impeccable` for designing the frontend.
 
 After answering many design questions, I approved the spec document and Claude went ahead to write the implementation plan.
+
+45 minutes later, the first iteration was born.
+
+## Iteration 1 
+
+The first iteration turned out better than expected! After adding my API keys, and fixing some small bug, the program worked as intended. However, I wasn't satisfied with the way it looked and the results. The different agents were giving their own summaries but there wasn't any consolidation of answers.
+
+
+

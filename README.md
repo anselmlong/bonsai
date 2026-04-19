@@ -1,13 +1,63 @@
 # Bonsai
 
-Multi-agent deep research system. Given a query, Bonsai decomposes it into a tree of sub-questions, researches each branch in parallel, and synthesises a final answer — with every intermediate step visible in real time.
+Bonsai is a multi-agent deep research system, with an emphasis on traceability. Given a query, Bonsai decomposes it into a tree of sub-questions, researches each branch in parallel, and synthesises a final answer — with every intermediate step visible in real time. 
 
-## Architecture
+Bonsai achieves 65% correctness on the SimpleQA evaluation dataset (n = 20) at a threshold of 0.7 using LLM-as-judge. For comparison, GPT o3 currently sits at 50.5%. 
 
-- **LangGraph** orchestrates the top-level research pipeline (planner → parallel fan-out → synthesize)
-- **BranchProcessor** handles recursive branch research (search → reflect → optional sub-branches)
-- **FastAPI + SSE** streams `NodeEvent`s to the frontend as the research tree grows
-- **Next.js** renders the live research graph as branches expand in real time, then transitions to a tabbed summary view (Answer | Graph | Tree) when synthesis completes
+Try out Bonsai live at [bonsai.anselmlong.com](bonsai.anselmlong.com).
+
+## Repository Layout
+
+```
+bonsai/
+├── backend/               # FastAPI backend
+│   ├── agents/           # Research agents (BranchProcessor, etc.)
+│   │   ├── branch_processor.py
+│   │   ├── research_graph.py
+│   │   └── searcher.py
+│   │   └── prompts/      # LangChain prompts
+│   │       ├── planner.md
+│   │       ├── reflect.md
+│   │       └── synthesizer.md
+│   ├── models/           # Data models and types
+│   │   ├── __init__.py
+│   │   └── types.py
+│   ├── config.py         # Configuration/settings
+│   ├── main.py           # API entry point (FastAPI)
+│   ├── Dockerfile
+│   └── tests/            # Unit & integration tests
+├── frontend/             # Next.js frontend
+│   ├── app/              # Next.js app router pages
+│   │   ├── page.tsx
+│   │   ├── layout.tsx
+│   │   └── research/
+│   ├── components/       # React components
+│   │   ├── AnswerRenderer.tsx
+│   │   ├── GraphView.tsx
+│   │   ├── NodeDetail.tsx
+│   │   ├── QueryInput.tsx
+│   │   ├── ResearchTree.tsx
+│   │   ├── SourceCard.tsx
+│   │   ├── StatusBar.tsx
+│   │   └── TreePanel.tsx
+│   ├── hooks/            # React hooks
+│   │   ├── useResearchStream.ts
+│   │   └── useResearchTree.ts
+│   ├── lib/              # Shared utilities/types
+│   │   └── types.ts
+│   ├── public/           # Static assets
+│   └── tsconfig.json
+├── scripts/              # Utility scripts
+│   └── eval.py           # Evaluation script (SimpleQA benchmark)
+├── docs/                 # Documentation/iterations
+│   ├── ITERATION_1.md
+│   └── ITERATION_2.md
+├── .env.example          # Environment template
+├── .env                  # Environment variables (local)
+├── docker-compose.yml    # Docker compose setup
+├── pyproject.toml        # Python project config
+└── uv.lock               # Python lockfile
+```
 
 ## Setup
 
@@ -26,6 +76,12 @@ cd frontend && bun install && cd ..
 ```
 
 ## Running
+
+Dev Script: 
+```
+./dev.sh
+```
+This development script runs both the backend and frontend simultaneously. If you wish to run them separately, refer to the next 2 commands.
 
 **Backend** (port 8000):
 ```bash
@@ -70,3 +126,27 @@ uv run python scripts/eval.py --n 50 --output results/eval.json
 ```
 
 Scores factual accuracy, citation accuracy, completeness, source quality, and conciseness using LLM-as-judge.
+
+### Results (SimpleQA, n=20)
+
+| Metric | Score |
+|--------|-------|
+| **Correct (≥0.7)** | 13/20 (65%) |
+| Avg latency | 30.1s |
+| Avg sources | 4.4 |
+
+| Dimension | Score |
+|-----------|-------|
+| factual_accuracy | 0.70 |
+| citation_accuracy | 0.88 |
+| completeness | 0.76 |
+| source_quality | 0.82 |
+| conciseness | 0.72 |
+
+## Potential Improvements
+
+This was done as a take home assignment as part of an interview. Given more time (and money), I plan to:
+- Use stronger search APIs like Exa 
+- Could consider searching first, then branching out subqueries from there 
+- Iterating on the system prompts to get better outputs 
+- The current graph view is not very smooth, some frontend iterations could fix that too.

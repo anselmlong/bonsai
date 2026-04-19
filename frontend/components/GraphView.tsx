@@ -149,7 +149,7 @@ export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewP
   }, [rootX, rootNodes.length]);
 
   const handleNodeClick = useCallback(
-    (_, node: any) => onSelect((node.data as { treeNode: TreeNode }).treeNode),
+    (_: unknown, node: any) => onSelect((node.data as { treeNode: TreeNode }).treeNode),
     [onSelect]
   );
 

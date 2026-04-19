@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     tavily_api_key: str = ""
+    brave_api_key: str = ""
     langsmith_api_key: str = ""
     cors_origins: str = "http://localhost:3000"
 
@@ -40,5 +41,7 @@ if settings.openai_api_key:
     _os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
 if settings.tavily_api_key:
     _os.environ.setdefault("TAVILY_API_KEY", settings.tavily_api_key)
+if settings.brave_api_key:
+    _os.environ.setdefault("BRAVE_API_KEY", settings.brave_api_key)
 if settings.langsmith_api_key:
     _os.environ.setdefault("LANGSMITH_API_KEY", settings.langsmith_api_key)

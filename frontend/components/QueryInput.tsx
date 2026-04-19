@@ -46,11 +46,11 @@ export function QueryInput({ variant }: QueryInputProps) {
         autoFocus={!isNav}
       />
       <button
-        className={`${styles.btn} ${isNav ? styles.btnNav : styles.btnHero}`}
+        className={`${styles.btn} ${isNav ? styles.btnNav : styles.btnHero} ${loading ? styles.loading : ""}`}
         type="submit"
         disabled={loading}
       >
-        {loading ? "…" : "→"}
+        {loading ? "→" : "→"}
       </button>
     </form>
   );

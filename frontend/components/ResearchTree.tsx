@@ -185,6 +185,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
         completeCount={completeCount}
         sourceCount={sourceCount}
         maxDepthReached={maxDepth}
+        synthesizing={!done && events.length > 0 && !finalAnswer}
       />
     </div>
   );

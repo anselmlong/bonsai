@@ -7,3 +7,5 @@
 .sep { color: var(--border-2); }
 .trace { color: var(--amber); margin-left: auto; text-decoration: none; }
 .trace:hover { text-decoration: underline; }
+.spinningDot { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

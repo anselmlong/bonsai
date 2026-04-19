@@ -14,7 +14,7 @@
   color: var(--text);
   outline: none;
 }
-.inputHero:focus { border-color: var(--amber); }
+.inputHero:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
 .btnHero {
   padding: 11px 20px;
   background: var(--amber);
@@ -26,8 +26,9 @@
   text-transform: uppercase;
   color: var(--bg);
   white-space: nowrap;
-  transition: transform 0.1s, opacity 0.15s;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s, opacity 0.15s;
 }
+.btnHero:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 .btnHero:not(:disabled):active { transform: translateY(1px); }
 
 /* Nav */
@@ -61,3 +62,9 @@
 .btnNav:not(:disabled):active { transform: translateY(1px); }
 
 .btnHero:disabled, .btnNav:disabled { opacity: .5; cursor: not-allowed; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.loading { animation: pulse 1s ease-in-out infinite; display: inline-block; }

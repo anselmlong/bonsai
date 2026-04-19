@@ -33,3 +33,6 @@ This turned out pretty well, a light editorial aesthetic with trees and nodes.
 
 After this, the main work was done, and I just prompted Claude to fix minor things that were a bit off. I was also looking through the code, but for parts I didn't understand, I used the `/explaining-code` skill to learn more about what the code was doing.
 
+## Final 
+
+Overall, this was a pretty fun project to work on to understand LangGraph and multi agent systems. Not as hard as I thought.

@@ -7,15 +7,26 @@ interface StatusBarProps {
   sourceCount: number;
   maxDepthReached: number;
   langsmithUrl?: string;
+  synthesizing: boolean;
 }
 
 export function StatusBar({
-  done, branchCount, completeCount, sourceCount, maxDepthReached, langsmithUrl,
+  done, branchCount, completeCount, sourceCount, maxDepthReached, langsmithUrl, synthesizing,
 }: StatusBarProps) {
   return (
     <div className={styles.bar}>
       {!done ? (
-        <><span className={styles.dot} /><span className={styles.active}>Researching</span></>
+        <>
+          <span className={styles.dot} />
+          {synthesizing ? (
+            <>
+              <span className={styles.active}>Synthesizing</span>
+              <span className={styles.spinningDot}>⟳</span>
+            </>
+          ) : (
+            <span className={styles.active}>Researching</span>
+          )}
+        </>
       ) : (
         <span className={styles.done}>Complete</span>
       )}

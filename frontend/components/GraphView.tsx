@@ -1,8 +1,8 @@
-"use client";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import {
   ReactFlow, Background,
   type Node, type Edge,
+  type Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { TreeNode } from "@/lib/types";
@@ -54,11 +54,11 @@ interface GraphViewProps {
 }
 
 export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewProps) {
-  const { rfNodes, rfEdges } = useMemo(() => {
+  const { rfNodes, rfEdges, rootX } = useMemo(() => {
     const all = flattenNodes(rootNodes);
     const positions = computePositions(rootNodes);
 
-    const rfNodes: Node[] = all.map((n) => ({
+    const rfNodes: any[] = all.map((n) => ({
       id: n.id,
       position: positions.get(n.id) ?? { x: 0, y: 0 },
       data: {
@@ -84,12 +84,13 @@ export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewP
       },
     }));
 
+    let rootX = 0;
     if (query) {
       const xs = rootNodes.map((n) => positions.get(n.id)?.x ?? 0);
-      const centerX = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
+      rootX = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
       rfNodes.unshift({
         id: ROOT_ID,
-        position: { x: centerX, y: -ROW_HEIGHT },
+        position: { x: rootX, y: -ROW_HEIGHT },
         data: {
           label: (
             <div className={styles.nodeLabel}>
@@ -111,7 +112,7 @@ export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewP
       });
     }
 
-    const rfEdges: Edge[] = all
+    const rfEdges: any[] = all
       .filter((n) => n.parentId && n.parentId !== "root")
       .map((n) => ({
         id: `${n.parentId}-${n.id}`,
@@ -133,16 +134,34 @@ export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewP
       });
     }
 
-    return { rfNodes, rfEdges };
+    return { rfNodes, rfEdges, rootX };
   }, [rootNodes, selectedId, query]);
+
+  // Calculate initial viewport to center on root node
+  const initialViewport = useMemo<Viewport | undefined>(() => {
+    if (rootNodes.length === 0) return undefined;
+    // Center on the root area around rootX, with a reasonable zoom
+    return {
+      x: rootX - 300,
+      y: -200,
+      zoom: 0.6,
+    };
+  }, [rootX, rootNodes.length]);
+
+  const handleNodeClick = useCallback(
+    (_, node: any) => onSelect((node.data as { treeNode: TreeNode }).treeNode),
+    [onSelect]
+  );
 
   return (
     <div className={styles.container}>
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}
-        onNodeClick={(_, node) => onSelect((node.data as { treeNode: TreeNode }).treeNode)}
+        onNodeClick={handleNodeClick}
         fitView
+        fitViewOptions={{ maxZoom: 2, minZoom: 0.1 }}
+        defaultViewport={initialViewport}
         colorMode="light"
         proOptions={{ hideAttribution: true }}
       >

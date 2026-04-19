@@ -34,7 +34,7 @@ DEFAULT_CONFIG: ResearchConfig = ResearchConfig(
     researcher_model="gpt-4o",
     synthesizer_model="gpt-5-mini-2025-08-07",
     synthesizer_max_sources=4,
-    synthesizer_max_excerpt_chars=300,
+    synthesizer_max_excerpt_chars=None,
     tavily_max_results=5,
 )
 

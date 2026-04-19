@@ -30,11 +30,6 @@ class ResearchRequest(BaseModel):
     config: dict | None = None
 
 
-class DiveDeeperRequest(BaseModel):
-    node_id: str
-    question: str
-
-
 @app.post("/research")
 async def start_research(req: ResearchRequest):
     job_id = uuid.uuid4().hex
@@ -78,28 +73,3 @@ async def get_result(job_id: str):
     if result is None:
         return {"status": "in_progress"}
     return {"status": "complete", **result}
-
-
-@app.post("/research/{job_id}/dive-deeper")
-async def dive_deeper(job_id: str, req: DiveDeeperRequest):
-    if job_id not in _jobs:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    queue: asyncio.Queue = _jobs[job_id]["queue"]
-    config: ResearchConfig = settings.research_config()
-    config["max_depth"] = 2  # always allow deeper
-
-    async def _run_branch():
-        from backend.agents.branch_processor import BranchProcessor
-        processor = BranchProcessor(queue)
-        await processor.run(
-            question=req.question,
-            parent_id=req.node_id,
-            depth=1,
-            config=config,
-            parent_summary=None,
-        )
-        # Do NOT send sentinel — original stream stays open
-
-    asyncio.create_task(_run_branch())
-    return {"status": "spawned"}

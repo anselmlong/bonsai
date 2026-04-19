@@ -1,5 +1,9 @@
 # Bonsai
 
+
+https://github.com/user-attachments/assets/52b7f8c2-be23-4f93-ae03-57174c5b9c7c
+
+
 Bonsai is a multi-agent deep research system, with an emphasis on traceability. Given a query, Bonsai decomposes it into a tree of sub-questions, researches each branch in parallel, and synthesises a final answer — with every intermediate step visible in real time. 
 
 Bonsai achieves 65% correctness on the SimpleQA evaluation dataset (n = 20) at a threshold of 0.7 using LLM-as-judge. For comparison, GPT o3 currently sits at 50.5%. 

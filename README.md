@@ -7,34 +7,34 @@ Multi-agent deep research system. Given a query, Bonsai decomposes it into a tre
 - **LangGraph** orchestrates the top-level research pipeline (planner → parallel fan-out → synthesize)
 - **BranchProcessor** handles recursive branch research (search → reflect → optional sub-branches)
 - **FastAPI + SSE** streams `NodeEvent`s to the frontend as the research tree grows
-- **Next.js** renders the live tree with a split-panel view and a React Flow graph toggle
+- **Next.js** renders the live research graph as branches expand in real time, then transitions to a tabbed summary view (Answer | Graph | Tree) when synthesis completes
 
 ## Setup
 
-**Requirements:** Python 3.11+, Node 18+
+**Requirements:** Python 3.11+, Node 18+, [uv](https://github.com/astral-sh/uv), [bun](https://bun.sh)
 
 ```bash
 # 1. Clone and install backend
-pip install -e ".[dev]"
+uv sync
 
 # 2. Set environment variables
 cp .env.example .env
 # Edit .env with your OPENAI_API_KEY and TAVILY_API_KEY
 
 # 3. Install frontend
-cd frontend && npm install && cd ..
+cd frontend && bun install && cd ..
 ```
 
 ## Running
 
 **Backend** (port 8000):
 ```bash
-uvicorn backend.main:app --reload
+uv run uvicorn backend.main:app --reload
 ```
 
 **Frontend** (port 3000):
 ```bash
-cd frontend && npm run dev
+cd frontend && bun dev
 ```
 
 Open `http://localhost:3000` and enter a research query.
@@ -55,10 +55,10 @@ curl -N http://localhost:8000/research/{job_id}/stream
 
 ```bash
 # Unit tests (fast, no API keys needed)
-pytest backend/tests/ -v -m "not slow"
+uv run pytest backend/tests/ -v -m "not slow"
 
 # Integration tests (requires API keys)
-pytest backend/tests/ -v -m slow
+uv run pytest backend/tests/ -v -m slow
 ```
 
 ## Eval
@@ -66,7 +66,7 @@ pytest backend/tests/ -v -m slow
 Run the SimpleQA benchmark against a subset of questions:
 
 ```bash
-python scripts/eval.py --n 50 --output results/eval.json
+uv run python scripts/eval.py --n 50 --output results/eval.json
 ```
 
 Scores factual accuracy, citation accuracy, completeness, source quality, and conciseness using LLM-as-judge.

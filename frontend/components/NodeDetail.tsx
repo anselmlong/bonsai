@@ -3,25 +3,13 @@ import type { TreeNode } from "@/lib/types";
 import { SourceCard } from "./SourceCard";
 import styles from "./NodeDetail.module.css";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 interface NodeDetailProps {
   node: TreeNode;
-  jobId: string;
-  allNodes: Map<string, TreeNode>;
   onSelect: (node: TreeNode) => void;
 }
 
-export function NodeDetail({ node, jobId, onSelect }: NodeDetailProps) {
+export function NodeDetail({ node, onSelect }: NodeDetailProps) {
   const subNodes = node.children;
-
-  const handleDiveDeeper = async () => {
-    await fetch(`${API_BASE}/research/${jobId}/dive-deeper`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ node_id: node.id, question: node.question }),
-    });
-  };
 
   return (
     <div className={styles.panel}>
@@ -32,11 +20,6 @@ export function NodeDetail({ node, jobId, onSelect }: NodeDetailProps) {
           </div>
           <h2 className={styles.title}>{node.question}</h2>
         </div>
-        {node.status === "complete" && (
-          <button className={styles.diveBtn} onClick={handleDiveDeeper}>
-            + DIVE DEEPER
-          </button>
-        )}
       </div>
 
       {node.summary && (

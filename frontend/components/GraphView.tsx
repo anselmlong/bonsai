@@ -44,13 +44,16 @@ function computePositions(roots: TreeNode[]): Map<string, { x: number; y: number
   return positions;
 }
 
+const ROOT_ID = "__query_root__";
+
 interface GraphViewProps {
   rootNodes: TreeNode[];
   selectedId: string | null;
   onSelect: (node: TreeNode) => void;
+  query?: string | null;
 }
 
-export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
+export function GraphView({ rootNodes, selectedId, onSelect, query }: GraphViewProps) {
   const { rfNodes, rfEdges } = useMemo(() => {
     const all = flattenNodes(rootNodes);
     const positions = computePositions(rootNodes);
@@ -81,6 +84,33 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
       },
     }));
 
+    if (query) {
+      const xs = rootNodes.map((n) => positions.get(n.id)?.x ?? 0);
+      const centerX = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
+      rfNodes.unshift({
+        id: ROOT_ID,
+        position: { x: centerX, y: -ROW_HEIGHT },
+        data: {
+          label: (
+            <div className={styles.nodeLabel}>
+              <span className={styles.nodeQuestion}>
+                {query.slice(0, 70)}{query.length > 70 ? "…" : ""}
+              </span>
+            </div>
+          ),
+        },
+        style: {
+          background: "#3d6b4a",
+          border: "1px solid #2a4d34",
+          borderRadius: "4px",
+          color: "#f5f0e8",
+          fontSize: "11px",
+          fontWeight: 600,
+          width: 200,
+        },
+      });
+    }
+
     const rfEdges: Edge[] = all
       .filter((n) => n.parentId && n.parentId !== "root")
       .map((n) => ({
@@ -91,8 +121,20 @@ export function GraphView({ rootNodes, selectedId, onSelect }: GraphViewProps) {
         animated: n.status !== "complete",
       }));
 
+    if (query) {
+      rootNodes.forEach((n) => {
+        rfEdges.push({
+          id: `${ROOT_ID}-${n.id}`,
+          source: ROOT_ID,
+          target: n.id,
+          style: { stroke: "#d4c8b4" },
+          animated: n.status !== "complete",
+        });
+      });
+    }
+
     return { rfNodes, rfEdges };
-  }, [rootNodes, selectedId]);
+  }, [rootNodes, selectedId, query]);
 
   return (
     <div className={styles.container}>

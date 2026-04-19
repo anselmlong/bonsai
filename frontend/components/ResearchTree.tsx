@@ -24,7 +24,7 @@ interface ResearchTreeProps {
 
 export function ResearchTree({ jobId }: ResearchTreeProps) {
   const { events, done } = useResearchStream(jobId);
-  const { rootNodes, nodeMap, finalAnswer } = useResearchTree(events);
+  const { rootNodes, nodeMap, finalAnswer, query } = useResearchTree(events);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("researching");
   const [activeTab, setActiveTab] = useState<ActiveTab>("summary");
@@ -133,7 +133,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
             {/* Graph tab */}
             <div className={`${styles.tabPanel} ${activeTab === "graph" ? styles.tabPanelActive : ""}`}>
               <div className={styles.graphTabContainer}>
-                <GraphView rootNodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
+                <GraphView rootNodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} query={query} />
                 {selected && (
                   <div className={styles.graphDetailPane}>
                     <NodeDetail node={selected} onSelect={handleSelect} />
@@ -148,14 +148,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
                 <TreePanel nodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
                 <div className={styles.detail}>
                   {selected ? (
-                    <>
-                      <div className={styles.backBar}>
-                        <button className={styles.backBtn} onClick={() => setSelectedId(null)}>
-                          ← Summary
-                        </button>
-                      </div>
-                      <NodeDetail node={selected} onSelect={handleSelect} />
-                    </>
+                    <NodeDetail node={selected} onSelect={handleSelect} />
                   ) : (
                     <div className={styles.placeholder}>
                       <span className={styles.placeholderArrow}>←</span>
@@ -169,7 +162,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
         </div>
       ) : (
         <div className={styles.graphStage}>
-          <GraphView rootNodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} />
+          <GraphView rootNodes={rootNodes} selectedId={selectedId} onSelect={handleSelect} query={query} />
           {selected && (
             <div className={styles.graphDetailPane}>
               <NodeDetail node={selected} onSelect={handleSelect} />

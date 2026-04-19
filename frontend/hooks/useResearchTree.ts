@@ -13,10 +13,12 @@ export function useResearchTree(events: NodeEvent[]): {
   rootNodes: TreeNode[];
   nodeMap: Map<string, TreeNode>;
   finalAnswer: string | null;
+  query: string | null;
 } {
   return useMemo(() => {
     const nodeMap = new Map<string, TreeNode>();
     let finalAnswer: string | null = null;
+    const query = events.find((e) => e.type === "research_started")?.question ?? null;
 
     for (const event of events) {
       if (event.type === "research_complete") {
@@ -65,6 +67,6 @@ export function useResearchTree(events: NodeEvent[]): {
       }
     }
 
-    return { rootNodes, nodeMap, finalAnswer };
+    return { rootNodes, nodeMap, finalAnswer, query };
   }, [events]);
 }

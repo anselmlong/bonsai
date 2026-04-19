@@ -111,7 +111,7 @@ async def evaluate_question(
 
 async def main(n: int, output_path: str, concurrency: int = 3) -> None:
     print(f"Loading SimpleQA dataset (first {n} questions)…")
-    ds = load_dataset("openai/simple-evals", "simpleqa", split="test")
+    ds = load_dataset("basicv8vc/SimpleQA", split="test")
     samples = list(ds.select(range(n)))
 
     config = settings.research_config()
@@ -122,6 +122,7 @@ async def main(n: int, output_path: str, concurrency: int = 3) -> None:
     results: list[EvalResult] = []
     sem = asyncio.Semaphore(concurrency)
 
+    
     async def run_with_sem(s):
         async with sem:
             r = await evaluate_question(s["problem"], s["answer"], config, oai_client)

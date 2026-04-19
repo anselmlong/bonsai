@@ -32,7 +32,7 @@ def reflect_on_results(
     sources_text = "\n".join(
         f"- {s['title']}: {s['excerpt'][:200]}" for s in sources[:5]
     )
-    llm = ChatOpenAI(model=config.get("researcher_model", "gpt-4o-mini"))
+    llm = ChatOpenAI(model=config.get("researcher_model", "gpt-4o"))
     structured = llm.with_structured_output(ReflectOutput)
 
     result: ReflectOutput = structured.invoke([

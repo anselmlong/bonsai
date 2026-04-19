@@ -15,7 +15,7 @@ class PlannerOutput(BaseModel):
 def plan_research(query: str, config: ResearchConfig) -> PlannerOutput:
     """Decompose a query into sub-questions using the planner prompt."""
     max_branches = config.get("max_branches", 5)
-    llm = ChatOpenAI(model=config.get("planner_model", "gpt-4o"))
+    llm = ChatOpenAI(model=config.get("planner_model", "gpt-5.4-mini"))
     structured = llm.with_structured_output(PlannerOutput)
 
     result: PlannerOutput = structured.invoke([

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import ReactMarkdown from "react-markdown";
+import { AnswerRenderer } from "./AnswerRenderer";
 import { useResearchStream } from "@/hooks/useResearchStream";
 import { useResearchTree } from "@/hooks/useResearchTree";
 import { TreePanel } from "./TreePanel";
@@ -30,7 +30,14 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
 
   const handleCopy = () => {
     if (!finalAnswer) return;
-    navigator.clipboard.writeText(finalAnswer).then(() => {
+    const plain = finalAnswer
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "")   // remove [text](url) links entirely
+      .replace(/^#{1,6}\s+/gm, "")              // remove ## heading markers
+      .replace(/\*\*([^*]+)\*\*/g, "$1")        // unwrap **bold**
+      .replace(/\*([^*]+)\*/g, "$1")            // unwrap *italic*
+      .replace(/\n{3,}/g, "\n\n")               // collapse excess blank lines
+      .trim();
+    navigator.clipboard.writeText(plain).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
@@ -48,7 +55,7 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
   return (
     <div className={styles.shell}>
       <nav className={styles.nav}>
-        <span className={styles.logo}>b<span>o</span>nsai</span>
+        <a href="/" className={styles.logo}>b<span>o</span>nsai</a>
         <span className={styles.navSep} />
         <QueryInput variant="nav" />
         <div className={styles.navSpacer} />
@@ -92,8 +99,13 @@ export function ResearchTree({ jobId }: ResearchTreeProps) {
                     </button>
                   </div>
                   <div className={styles.answerText}>
-                    <ReactMarkdown>{finalAnswer}</ReactMarkdown>
+                    <AnswerRenderer content={finalAnswer} />
                   </div>
+                </div>
+              ) : !done ? (
+                <div className={styles.generating}>
+                  <span className={styles.generatingDot} />
+                  Researching — answer will appear here
                 </div>
               ) : (
                 <div className={styles.placeholder}>

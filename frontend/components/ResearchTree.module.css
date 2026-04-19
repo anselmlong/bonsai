@@ -1,6 +1,6 @@
 .shell { display: flex; flex-direction: column; height: 100vh; background: var(--bg); }
 .nav { display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 44px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.logo { font-style: italic; font-weight: 400; font-size: 16px; letter-spacing: -.01em; }
+.logo { font-style: italic; font-weight: 400; font-size: 16px; letter-spacing: -.01em; text-decoration: none; color: inherit; }
 .logo span { color: var(--amber); }
 .navSep { width: 1px; height: 16px; background: var(--border); }.navSpacer { flex: 1; }
 .toggle { display: flex; gap: 2px; }
@@ -19,11 +19,12 @@
 .answerText { font-family: var(--ff-body); font-size: 14px; font-weight: 300; color: var(--text-2); line-height: 1.85; }
 .answerText p { margin-bottom: 0.9em; }
 .answerText p:last-child { margin-bottom: 0; }
-.answerText a { color: var(--amber); text-decoration: underline; text-underline-offset: 2px; }
-.answerText a:hover { opacity: 0.8; }
 .backBar { padding: 8px 24px; border-bottom: 1px solid var(--border); }
 .backBtn { background: transparent; border: none; padding: 0; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); cursor: pointer; transition: color 0.15s; }
 .backBtn:hover { color: var(--amber); }
 .placeholder { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); gap: 8px; }
 .placeholderArrow { opacity: .4; }
+.generating { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); gap: 10px; }
+.generatingDot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); opacity: 0.7; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.2; transform: scale(0.85); } 50% { opacity: 0.8; transform: scale(1.1); } }
 .graphDetailPane { width: 420px; flex-shrink: 0; overflow: hidden; border-left: 1px solid var(--border); }

@@ -29,5 +29,7 @@ I wrote some feedback and bugs in a markdown file and asked Claude to iterate on
 
 This turned out pretty well, a light editorial aesthetic with trees and nodes.
 
+## Iteration 3+
 
+After this, the main work was done, and I just prompted Claude to fix minor things that were a bit off. I was also looking through the code, but for parts I didn't understand, I used the `/explaining-code` skill to learn more about what the code was doing.
 

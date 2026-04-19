@@ -3,9 +3,16 @@ import operator
 from typing import Annotated, Literal, TypedDict
 
 NODE_EVENT_TYPES = {
-    "research_started", "plan_complete", "branch_started",
-    "branch_searching", "branch_reflecting", "branch_spawning",
-    "branch_complete", "synthesis_started", "research_complete", "error",
+    "research_started",
+    "plan_complete",
+    "branch_started",
+    "branch_searching",
+    "branch_reflecting",
+    "branch_spawning",
+    "branch_complete",
+    "synthesis_started",
+    "research_complete",
+    "error",
 }
 
 
@@ -15,15 +22,19 @@ class ResearchConfig(TypedDict, total=False):
     planner_model: str
     researcher_model: str
     synthesizer_model: str
+    synthesizer_max_sources: int
+    synthesizer_max_excerpt_chars: int
     tavily_max_results: int
 
 
 DEFAULT_CONFIG: ResearchConfig = ResearchConfig(
     max_branches=5,
     max_depth=2,
-    planner_model="gpt-4o",
-    researcher_model="gpt-4o-mini",
-    synthesizer_model="gpt-4o",
+    planner_model="gpt-5.4-mini",
+    researcher_model="gpt-4o",
+    synthesizer_model="gpt-5-mini-2025-08-07",
+    synthesizer_max_sources=4,
+    synthesizer_max_excerpt_chars=300,
     tavily_max_results=5,
 )
 
@@ -46,10 +57,16 @@ class BranchResult(TypedDict):
 
 class NodeEvent(TypedDict):
     type: Literal[
-        "research_started", "plan_complete",
-        "branch_started", "branch_searching", "branch_reflecting",
-        "branch_spawning", "branch_complete",
-        "synthesis_started", "research_complete", "error",
+        "research_started",
+        "plan_complete",
+        "branch_started",
+        "branch_searching",
+        "branch_reflecting",
+        "branch_spawning",
+        "branch_complete",
+        "synthesis_started",
+        "research_complete",
+        "error",
     ]
     node_id: str
     parent_id: str | None
@@ -63,6 +80,7 @@ class NodeEvent(TypedDict):
 
 class BranchProcessorInput(TypedDict):
     """Input sent to branch_runner node via LangGraph Send API."""
+
     job_id: str
     question: str
     depth: int

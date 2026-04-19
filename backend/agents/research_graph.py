@@ -20,6 +20,7 @@ async def run_research(
     """
     processor = BranchProcessor(event_queue)
 
+    # this is the starter node that starts the research.
     await event_queue.put(NodeEvent(
         type="research_started", node_id="root", parent_id=None,
         depth=0, question=query, sources=None, summary=None,

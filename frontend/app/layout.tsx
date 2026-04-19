@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bonsai — Deep Research",
+  title: "bonsai — traceable deep research",
   description: "Multi-agent deep research system",
 };
 

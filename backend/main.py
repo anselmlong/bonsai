@@ -32,6 +32,7 @@ class ResearchRequest(BaseModel):
 
 @app.post("/research")
 async def start_research(req: ResearchRequest):
+    # assign a unique job id to prevent collisions
     job_id = uuid.uuid4().hex
     config: ResearchConfig = settings.research_config()
     if req.config:

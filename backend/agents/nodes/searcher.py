@@ -1,10 +1,25 @@
 import os
 import logging
+import hashlib
+import json
 import requests
+from pathlib import Path
 from tavily import TavilyClient
 from backend.models.types import ResearchConfig, Source
 
 logger = logging.getLogger(__name__)
+
+CACHE_DIR = Path("cache/search")
+
+
+def _cache_path(query: str, max_results: int) -> Path | None:
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        logger.warning(f"Search cache dir unavailable: {e}")
+        return None
+    key = hashlib.sha256(f"{query}{max_results}".encode()).hexdigest()[:16]
+    return CACHE_DIR / f"{key}.json"
 
 
 def _search_brave(question: str, max_results: int) -> list[Source]:
@@ -32,9 +47,18 @@ def _search_brave(question: str, max_results: int) -> list[Source]:
 
 
 def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
-    """Call Tavily, fallback to Brave on failure."""
+    """Call Tavily, fallback to Brave on failure. Results are cached to disk."""
     max_results = config.get("tavily_max_results", 5)
+    path = _cache_path(question, max_results)
 
+    if path is not None and path.exists():
+        try:
+            data = json.loads(path.read_text())
+            return [Source(**r) for r in data["results"]]
+        except Exception as e:
+            logger.warning(f"Search cache read failed: {e}")
+
+    results: list[Source] = []
     try:
         client = TavilyClient()
         response = client.search(
@@ -42,7 +66,7 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
             max_results=max_results,
             include_answer=False,
         )
-        return [
+        results = [
             Source(
                 url=r.get("url", ""),
                 title=r.get("title", ""),
@@ -53,9 +77,19 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
         ]
     except Exception as e:
         logger.warning(f"Tavily failed: {e}, falling back to Brave")
+        try:
+            results = _search_brave(question, max_results)
+        except Exception as e:
+            logger.error(f"Brave fallback failed: {e}")
 
-    try:
-        return _search_brave(question, max_results)
-    except Exception as e:
-        logger.error(f"Brave fallback failed: {e}")
-        return []
+    if path is not None:
+        try:
+            path.write_text(json.dumps({
+                "query": question,
+                "max_results": max_results,
+                "results": list(results),
+            }))
+        except Exception as e:
+            logger.warning(f"Search cache write failed: {e}")
+
+    return results

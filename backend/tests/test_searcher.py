@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 from backend.agents.nodes.searcher import search_tavily
 from backend.models.types import DEFAULT_CONFIG
 import json
-import tempfile
+import hashlib
 from pathlib import Path
 import backend.agents.nodes.searcher as searcher_module
 
@@ -63,6 +63,8 @@ def test_cache_miss_calls_api_and_writes(mock_client_class, tmp_path, monkeypatc
     data = json.loads(cache_files[0].read_text())
     assert data["query"] == "cache miss query"
     assert len(data["results"]) == 1
+    assert len(sources) == 1
+    assert sources[0]["url"] == "https://a.com"
 
 
 @patch("backend.agents.nodes.searcher.TavilyClient")
@@ -71,7 +73,6 @@ def test_cache_hit_skips_api(mock_client_class, tmp_path, monkeypatch):
     (tmp_path / "search").mkdir(parents=True)
 
     # Pre-populate cache
-    import hashlib
     max_results = DEFAULT_CONFIG["tavily_max_results"]
     key = hashlib.sha256(f"cached query{max_results}".encode()).hexdigest()[:16]
     cache_file = tmp_path / "search" / f"{key}.json"
@@ -89,7 +90,6 @@ def test_corrupt_cache_treated_as_miss(mock_client_class, tmp_path, monkeypatch)
     monkeypatch.setattr(searcher_module, "CACHE_DIR", tmp_path / "search")
     (tmp_path / "search").mkdir(parents=True)
 
-    import hashlib
     max_results = DEFAULT_CONFIG["tavily_max_results"]
     key = hashlib.sha256(f"corrupt query{max_results}".encode()).hexdigest()[:16]
     (tmp_path / "search" / f"{key}.json").write_text("not valid json{{")
@@ -101,3 +101,4 @@ def test_corrupt_cache_treated_as_miss(mock_client_class, tmp_path, monkeypatch)
     sources = search_tavily("corrupt query", DEFAULT_CONFIG)
 
     mock_client.search.assert_called_once()
+    assert sources == []

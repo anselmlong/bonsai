@@ -3,7 +3,6 @@ from backend.agents.nodes.searcher import search_tavily
 from backend.models.types import DEFAULT_CONFIG
 import json
 import hashlib
-from pathlib import Path
 import backend.agents.nodes.searcher as searcher_module
 
 
@@ -82,6 +81,7 @@ def test_cache_hit_skips_api(mock_client_class, tmp_path, monkeypatch):
     sources = search_tavily("cached query", DEFAULT_CONFIG)
 
     mock_client_class.assert_not_called()
+    assert len(sources) == 1
     assert sources[0]["url"] == "https://cached.com"
 
 

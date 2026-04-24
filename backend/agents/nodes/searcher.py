@@ -9,15 +9,10 @@ from backend.models.types import ResearchConfig, Source
 
 logger = logging.getLogger(__name__)
 
-CACHE_DIR = Path("cache/search")
+CACHE_DIR = Path(__file__).parent.parent.parent.parent / "cache" / "search"
 
 
-def _cache_path(query: str, max_results: int) -> Path | None:
-    try:
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    except OSError as e:
-        logger.warning(f"Search cache dir unavailable: {e}")
-        return None
+def _cache_path(query: str, max_results: int) -> Path:
     key = hashlib.sha256(f"{query}{max_results}".encode()).hexdigest()[:16]
     return CACHE_DIR / f"{key}.json"
 
@@ -51,7 +46,7 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
     max_results = config.get("tavily_max_results", 5)
     path = _cache_path(question, max_results)
 
-    if path is not None and path.exists():
+    if path.exists():
         try:
             data = json.loads(path.read_text())
             return [Source(**r) for r in data["results"]]
@@ -82,12 +77,13 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
         except Exception as e:
             logger.error(f"Brave fallback failed: {e}")
 
-    if path is not None:
+    if results:
         try:
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps({
                 "query": question,
                 "max_results": max_results,
-                "results": list(results),
+                "results": [dict(r) for r in results],
             }))
         except Exception as e:
             logger.warning(f"Search cache write failed: {e}")

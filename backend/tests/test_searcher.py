@@ -1,9 +1,15 @@
+import pytest
 from unittest.mock import MagicMock, patch
 from backend.agents.nodes.searcher import search_tavily
 from backend.models.types import DEFAULT_CONFIG
 import json
 import hashlib
 import backend.agents.nodes.searcher as searcher_module
+
+
+@pytest.fixture(autouse=True)
+def _isolate_cache(tmp_path, monkeypatch):
+    monkeypatch.setattr(searcher_module, "CACHE_DIR", tmp_path / "search")
 
 
 @patch("backend.agents.nodes.searcher.TavilyClient")
@@ -46,8 +52,8 @@ def test_search_tavily_handles_missing_fields(mock_client_class):
 
 
 @patch("backend.agents.nodes.searcher.TavilyClient")
-def test_cache_miss_calls_api_and_writes(mock_client_class, tmp_path, monkeypatch):
-    monkeypatch.setattr(searcher_module, "CACHE_DIR", tmp_path / "search")
+def test_cache_miss_calls_api_and_writes(mock_client_class, tmp_path):
+    # monkeypatch removed — handled by _isolate_cache autouse fixture
     mock_client = MagicMock()
     mock_client_class.return_value = mock_client
     mock_client.search.return_value = {
@@ -67,11 +73,10 @@ def test_cache_miss_calls_api_and_writes(mock_client_class, tmp_path, monkeypatc
 
 
 @patch("backend.agents.nodes.searcher.TavilyClient")
-def test_cache_hit_skips_api(mock_client_class, tmp_path, monkeypatch):
-    monkeypatch.setattr(searcher_module, "CACHE_DIR", tmp_path / "search")
+def test_cache_hit_skips_api(mock_client_class, tmp_path):
+    # monkeypatch removed — handled by _isolate_cache autouse fixture
     (tmp_path / "search").mkdir(parents=True)
 
-    # Pre-populate cache
     max_results = DEFAULT_CONFIG["tavily_max_results"]
     key = hashlib.sha256(f"cached query{max_results}".encode()).hexdigest()[:16]
     cache_file = tmp_path / "search" / f"{key}.json"
@@ -86,8 +91,8 @@ def test_cache_hit_skips_api(mock_client_class, tmp_path, monkeypatch):
 
 
 @patch("backend.agents.nodes.searcher.TavilyClient")
-def test_corrupt_cache_treated_as_miss(mock_client_class, tmp_path, monkeypatch):
-    monkeypatch.setattr(searcher_module, "CACHE_DIR", tmp_path / "search")
+def test_corrupt_cache_treated_as_miss(mock_client_class, tmp_path):
+    # monkeypatch removed — handled by _isolate_cache autouse fixture
     (tmp_path / "search").mkdir(parents=True)
 
     max_results = DEFAULT_CONFIG["tavily_max_results"]

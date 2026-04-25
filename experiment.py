@@ -10,6 +10,7 @@ import hashlib
 import json
 import logging
 import os
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -105,10 +106,20 @@ def _cache_path(query: str, max_results: int) -> Path:
     return CACHE_DIR / f"{key}.json"
 
 
+_brave_rate_lock = threading.Lock()
+_brave_last_call_time: float = 0.0
+
+
 def _search_brave(question: str, max_results: int) -> list[Source]:
+    global _brave_last_call_time
     api_key = os.environ.get("BRAVE_API_KEY", "")
     if not api_key:
         return []
+    with _brave_rate_lock:
+        elapsed = time.time() - _brave_last_call_time
+        if elapsed < 1.0:
+            time.sleep(1.0 - elapsed)
+        _brave_last_call_time = time.time()
     response = httpx.get(
         "https://api.search.brave.com/res/v1/web/search",
         headers={"Accept": "application/json", "X-Subscription-Token": api_key},

@@ -15,11 +15,10 @@ factual questions. Edit this file to improve the composite score on SimpleQA.
 - source_quality    × 0.05
 - conciseness       × 0.05
 
-**Baseline composite score:** 0.456 (9/20 correct) — established 2026-04-25, temperature=1 planner
+**Baseline composite score:** 0.904 (18/20 correct) — established 2026-04-25, Brave fallback active
 
-> **Note:** Tavily free plan hit usage limit during the baseline run. 11/20 questions had no
-> search results; the 0.456 baseline reflects LLM parametric knowledge for those. Upgrade
-> Tavily to get full search coverage. After upgrading, re-run baseline to get a clean score.
+> Tavily is rate-limited (free plan exhausted). Brave API is the active search provider.
+> Cache is fully warmed (172 entries). Subsequent runs are cache-served and free.
 
 ## Current Architecture
 
@@ -74,12 +73,13 @@ findable, higher factual accuracy and completeness.
 ## Eval validity requirements
 
 Before results are trustworthy:
-1. **Tavily credits** — searches must succeed. The free plan ran out. Top up or upgrade the plan.
-2. **Warm cache** — run baseline once with working Tavily to populate `cache/search/`. Subsequent
-   runs use the cache (free, fast, deterministic).
-3. **Deterministic planner** — `plan_research()` now uses `temperature=0`. This ensures the same
-   sub-questions are generated each run, so cached searches are reused. If you change the planner
-   prompt or model, you must re-warm the cache (one Tavily run).
+1. **Search provider** — `search()` tries Tavily first, falls back to Brave. Brave API key is in
+   `.env`. If both fail, sources will be empty and scores will drop.
+2. **Warm cache** — run baseline once to populate `cache/search/` (currently 172 entries). All
+   subsequent runs are cache-served and free.
+3. **Deterministic planner** — `plan_research()` uses `temperature=0`. This ensures the same
+   sub-questions each run, keeping cache hits stable. If you change the planner prompt or model,
+   delete `cache/search/` and re-run baseline to warm the new sub-questions.
 
 ## Workflow
 

@@ -9,10 +9,12 @@ import asyncio
 import hashlib
 import json
 import logging
+import os
 import time
 import uuid
 from pathlib import Path
 
+import httpx
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
@@ -104,8 +106,31 @@ def _cache_path(query: str, max_results: int) -> Path:
     return CACHE_DIR / f"{key}.json"
 
 
+def _search_brave(question: str, max_results: int) -> list[Source]:
+    api_key = os.environ.get("BRAVE_API_KEY", "")
+    if not api_key:
+        return []
+    response = httpx.get(
+        "https://api.search.brave.com/res/v1/web/search",
+        headers={"Accept": "application/json", "X-Subscription-Token": api_key},
+        params={"q": question, "count": max_results},
+        timeout=10,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return [
+        Source(
+            url=r.get("url", ""),
+            title=r.get("title", ""),
+            excerpt=r.get("description", ""),
+            score=0.0,
+        )
+        for r in data.get("web", {}).get("results", [])[:max_results]
+    ]
+
+
 def search(question: str, config: ResearchConfig) -> list[Source]:
-    """Search Tavily with disk cache."""
+    """Search Tavily with Brave fallback, results cached to disk."""
     max_results = config.get("tavily_max_results", 5)
     path = _cache_path(question, max_results)
 
@@ -130,7 +155,13 @@ def search(question: str, config: ResearchConfig) -> list[Source]:
             for r in response.get("results", [])
         ]
     except Exception as e:
-        logger.warning(f"Search failed: {e}")
+        logger.warning(f"Tavily search failed: {e}")
+
+    if not results:
+        try:
+            results = _search_brave(question, max_results)
+        except Exception as e:
+            logger.warning(f"Brave search failed: {e}")
 
     if results:
         try:

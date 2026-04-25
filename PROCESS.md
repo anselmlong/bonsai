@@ -36,3 +36,15 @@ After this, the main work was done, and I just prompted Claude to fix minor thin
 ## Final 
 
 Overall, this was a pretty fun project to work on to understand LangGraph and multi agent systems. Not as hard as I thought.
+
+---- 
+
+I decided to improve my search using Karpathy's autoresearch. Let's see how it goes. Unfortunately, I ran out of Tavily credits, so I fell back to using Brave instead. 
+
+## Modifying Bonsai 
+
+To run autoresearch, I needed a way to run `eval.py` consistently without burning many credits. This led to the idea of caching the search results so I didn't have to call Tavily/Brave every run. 
+
+## First Hypothesis
+
+Autoresearch decided to try searching first before planning, which might work. 

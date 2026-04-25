@@ -257,7 +257,7 @@ def reflect_on_results(
     sources_text = "\n".join(
         f"- {s['title']}: {s['excerpt'][:200]}" for s in sources[:5]
     )
-    llm = ChatOpenAI(model=config.get("researcher_model", "gpt-4o"))
+    llm = ChatOpenAI(model=config.get("researcher_model", "gpt-4o"), temperature=0)
     structured = llm.with_structured_output(ReflectOutput)
     result: ReflectOutput = structured.invoke([
         SystemMessage(content=REFLECT_PROMPT),
@@ -303,7 +303,7 @@ def _flatten_branch(
 
 
 def synthesize_answer(query: str, branches: list[BranchResult], config: ResearchConfig) -> str:
-    llm = ChatOpenAI(model=config.get("synthesizer_model", "gpt-5-mini-2025-08-07"))
+    llm = ChatOpenAI(model=config.get("synthesizer_model", "gpt-5-mini-2025-08-07"), temperature=0)
     max_sources = config.get("synthesizer_max_sources", 4)
     max_excerpt_chars = config.get("synthesizer_max_excerpt_chars", None)
     branches_text = "\n\n".join(

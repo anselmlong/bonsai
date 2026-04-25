@@ -198,6 +198,13 @@ dev = [
     { name = "pytest-mock" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=3.0" },
@@ -215,6 +222,13 @@ requires-dist = [
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "pytest-mock", specifier = ">=3.14" },
+]
 
 [[package]]
 name = "certifi"

@@ -3,6 +3,7 @@
 
 Usage:
     python scripts/eval.py --n 50 --output results/eval.json
+    python scripts/eval.py --n 20 --output results/experiment.json --experiment
 
 Requirements:
     - OPENAI_API_KEY and TAVILY_API_KEY set in environment
@@ -19,13 +20,11 @@ import time
 from pathlib import Path
 from typing import TypedDict
 
-# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from datasets import load_dataset
 from openai import OpenAI
 
-from backend.agents.research_graph import run_research
 from backend.config import settings
 from backend.models.types import DEFAULT_CONFIG
 
@@ -46,6 +45,18 @@ Score each dimension from 0.0 to 1.0:
 Return JSON only: {{"factual_accuracy": 0.0, "citation_accuracy": 0.0, "completeness": 0.0, "source_quality": 0.0, "conciseness": 0.0}}"""
 
 DIMENSIONS = ["factual_accuracy", "citation_accuracy", "completeness", "source_quality", "conciseness"]
+
+WEIGHTS: dict[str, float] = {
+    "factual_accuracy": 0.50,
+    "completeness": 0.20,
+    "citation_accuracy": 0.20,
+    "source_quality": 0.05,
+    "conciseness": 0.05,
+}
+
+
+def composite_score(scores: dict[str, float]) -> float:
+    return sum(scores.get(dim, 0.0) * weight for dim, weight in WEIGHTS.items())
 
 
 class EvalResult(TypedDict):
@@ -76,11 +87,12 @@ async def evaluate_question(
     gold_answer: str,
     config: dict,
     oai_client: OpenAI,
+    run_research_fn,
 ) -> EvalResult:
     queue: asyncio.Queue = asyncio.Queue()
     start = time.time()
     try:
-        result = await run_research(
+        result = await run_research_fn(
             job_id=f"eval-{int(start)}",
             query=question,
             config=config,
@@ -109,42 +121,46 @@ async def evaluate_question(
         )
 
 
-async def main(n: int, output_path: str, concurrency: int = 3) -> None:
+async def main(n: int, output_path: str, concurrency: int, experiment: bool) -> None:
+    if experiment:
+        from experiment import run_research as run_research_fn
+        print("Using experiment.py pipeline")
+    else:
+        from backend.agents.research_graph import run_research as run_research_fn
+
     print(f"Loading SimpleQA dataset (first {n} questions)…")
     ds = load_dataset("basicv8vc/SimpleQA", split="test")
     samples = list(ds.select(range(n)))
 
     config = settings.research_config()
     config["max_branches"] = 3
-    config["max_depth"] = 1   # keep eval fast
+    config["max_depth"] = 1
 
     oai_client = OpenAI(api_key=settings.openai_api_key)
-    results: list[EvalResult] = []
     sem = asyncio.Semaphore(concurrency)
 
-    
     async def run_with_sem(s):
         async with sem:
-            r = await evaluate_question(s["problem"], s["answer"], config, oai_client)
-            print(f"  {'✓' if r['scores']['factual_accuracy'] >= 0.7 else '✗'} {s['problem'][:60]}")
+            r = await evaluate_question(s["problem"], s["answer"], config, oai_client, run_research_fn)
+            cs = composite_score(r["scores"])
+            print(f"  {'✓' if r['scores']['factual_accuracy'] >= 0.7 else '✗'} [{cs:.2f}] {s['problem'][:55]}")
             return r
 
     print(f"Running {n} questions (concurrency={concurrency})…")
     results = await asyncio.gather(*[run_with_sem(s) for s in samples])
 
-    # Write JSONL
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         for r in results:
             f.write(json.dumps(r) + "\n")
 
-    # Summary
     valid = [r for r in results if not r["error"]]
     correct = [r for r in valid if r["scores"]["factual_accuracy"] >= 0.7]
     avg_scores = {
         dim: sum(r["scores"][dim] for r in valid) / len(valid)
         for dim in DIMENSIONS
     } if valid else {}
+    avg_composite = sum(composite_score(r["scores"]) for r in valid) / len(valid) if valid else 0.0
     avg_latency = sum(r["latency_s"] for r in valid) / len(valid) if valid else 0
     avg_sources = sum(r["source_count"] for r in valid) / len(valid) if valid else 0
 
@@ -154,12 +170,14 @@ SimpleQA Eval — bonsai
 Questions:        {n}
 Errors:           {len(results) - len(valid)}
 Correct (≥0.7):   {len(correct)}  ({100*len(correct)/n:.1f}%)
+Composite score:  {avg_composite:.3f}
 Avg latency:      {avg_latency:.1f}s
 Avg sources:      {avg_sources:.1f}
 ─────────────────────────────────────
 Dimension scores:""")
     for dim, score in avg_scores.items():
-        print(f"  {dim:<22} {score:.2f}")
+        weight = WEIGHTS[dim]
+        print(f"  {dim:<22} {score:.2f}  (weight {weight:.2f})")
     print(f"─────────────────────────────────────")
     print(f"Results written to {output_path}")
 
@@ -169,5 +187,6 @@ if __name__ == "__main__":
     parser.add_argument("--n", type=int, default=20, help="Number of questions to evaluate")
     parser.add_argument("--output", type=str, default="results/eval.json", help="Output JSONL path")
     parser.add_argument("--concurrency", type=int, default=3, help="Parallel requests")
+    parser.add_argument("--experiment", action="store_true", help="Use experiment.py instead of research_graph.py")
     args = parser.parse_args()
-    asyncio.run(main(args.n, args.output, args.concurrency))
+    asyncio.run(main(args.n, args.output, args.concurrency, args.experiment))

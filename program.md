@@ -15,7 +15,11 @@ factual questions. Edit this file to improve the composite score on SimpleQA.
 - source_quality    × 0.05
 - conciseness       × 0.05
 
-**Baseline composite score:** TBD — run eval once before starting experiments
+**Baseline composite score:** 0.456 (9/20 correct) — established 2026-04-25, temperature=1 planner
+
+> **Note:** Tavily free plan hit usage limit during the baseline run. 11/20 questions had no
+> search results; the 0.456 baseline reflects LLM parametric knowledge for those. Upgrade
+> Tavily to get full search coverage. After upgrading, re-run baseline to get a clean score.
 
 ## Current Architecture
 
@@ -66,6 +70,16 @@ findable, higher factual accuracy and completeness.
 - Try a shorter, more direct output style focused on factual density
 - Try instructing the synthesizer to always state confidence level on key claims
 - Try requiring citations on every sentence that states a fact
+
+## Eval validity requirements
+
+Before results are trustworthy:
+1. **Tavily credits** — searches must succeed. The free plan ran out. Top up or upgrade the plan.
+2. **Warm cache** — run baseline once with working Tavily to populate `cache/search/`. Subsequent
+   runs use the cache (free, fast, deterministic).
+3. **Deterministic planner** — `plan_research()` now uses `temperature=0`. This ensures the same
+   sub-questions are generated each run, so cached searches are reused. If you change the planner
+   prompt or model, you must re-warm the cache (one Tavily run).
 
 ## Workflow
 

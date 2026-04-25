@@ -18,7 +18,6 @@ import httpx
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
-from tavily import TavilyClient
 
 from backend.models.types import BranchResult, NodeEvent, ResearchConfig, Source
 
@@ -130,7 +129,7 @@ def _search_brave(question: str, max_results: int) -> list[Source]:
 
 
 def search(question: str, config: ResearchConfig) -> list[Source]:
-    """Search Tavily with Brave fallback, results cached to disk."""
+    """Search with disk cache, Brave as the live provider."""
     max_results = config.get("tavily_max_results", 5)
     path = _cache_path(question, max_results)
 
@@ -143,25 +142,9 @@ def search(question: str, config: ResearchConfig) -> list[Source]:
 
     results: list[Source] = []
     try:
-        client = TavilyClient()
-        response = client.search(query=question, max_results=max_results, include_answer=False)
-        results = [
-            Source(
-                url=r.get("url", ""),
-                title=r.get("title", ""),
-                excerpt=r.get("content", ""),
-                score=r.get("score", 0.0),
-            )
-            for r in response.get("results", [])
-        ]
+        results = _search_brave(question, max_results)
     except Exception as e:
-        logger.warning(f"Tavily search failed: {e}")
-
-    if not results:
-        try:
-            results = _search_brave(question, max_results)
-        except Exception as e:
-            logger.warning(f"Brave search failed: {e}")
+        logger.warning(f"Brave search failed: {e}")
 
     if results:
         try:

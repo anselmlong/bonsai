@@ -16,9 +16,12 @@ import uuid
 from pathlib import Path
 
 import httpx
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
+
+load_dotenv()  # ensures SERPER_API_KEY is available when running via uv
 
 from backend.models.types import BranchResult, NodeEvent, ResearchConfig, Source
 
@@ -29,22 +32,23 @@ CACHE_DIR = Path(__file__).parent / "cache" / "search"
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
 PLANNER_PROMPT = """\
-You are a research planner. Given a user query, decompose it into focused sub-questions that can be researched independently and in parallel.
+You are a research planner. Given a user query — and optionally some initial web search results — decompose it into focused sub-questions for parallel research.
 
 ## Scaling rules (follow exactly)
-- Simple fact-finding (single answer, few entities): generate 1–2 sub-questions, expect 3–10 tool calls total.
-- Comparisons or multi-part questions: generate 2–4 sub-questions, expect 10–15 tool calls each.
-- Complex research (broad topic, multiple dimensions): generate 4–5 sub-questions with clearly divided responsibilities.
+- Simple fact-finding (single answer, few entities): generate 1–2 sub-questions.
+- Comparisons or multi-part questions: generate 2–3 sub-questions.
+- Complex research (broad topic, multiple dimensions): generate 3–5 sub-questions with clearly divided responsibilities.
 
 ## Output
 Return a JSON object with:
-- `sub_questions`: array of strings (max length set by caller). Each sub-question is a complete, self-contained research question.
+- `sub_questions`: array of strings (max length set by caller). Each sub-question is complete and self-contained.
 - `reasoning`: one sentence explaining your scaling decision.
 
 ## Rules
-- Sub-questions must not overlap. Each should address a distinct dimension.
+- Sub-questions must not overlap. Each must address a distinct dimension.
 - Do not generate more sub-questions than the max allowed.
-- Prefer depth over breadth within each sub-question.
+- Every sub-question must carry all named entities, proper nouns, years, and specific identifiers from the original query — do not drop person names, award names, event names, or numeric identifiers.
+- If initial web results are provided, bias sub-questions toward filling gaps those results leave open, not repeating what they already cover.
 """
 
 REFLECT_PROMPT = """\
@@ -106,6 +110,29 @@ def _cache_path(query: str, max_results: int) -> Path:
     return CACHE_DIR / f"{key}.json"
 
 
+def _search_serper(question: str, max_results: int) -> list[Source]:
+    api_key = os.environ.get("SERPER_API_KEY", "")
+    if not api_key:
+        return []
+    response = httpx.post(
+        "https://google.serper.dev/search",
+        headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+        json={"q": question, "num": max_results},
+        timeout=10,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return [
+        Source(
+            url=r.get("link", ""),
+            title=r.get("title", ""),
+            excerpt=r.get("snippet", ""),
+            score=0.0,
+        )
+        for r in data.get("organic", [])[:max_results]
+    ]
+
+
 _brave_rate_lock = threading.Lock()
 _brave_last_call_time: float = 0.0
 
@@ -140,7 +167,7 @@ def _search_brave(question: str, max_results: int) -> list[Source]:
 
 
 def search(question: str, config: ResearchConfig) -> list[Source]:
-    """Search with disk cache, Brave as the live provider."""
+    """Search with disk cache. Tries Serper first, falls back to Brave."""
     max_results = config.get("tavily_max_results", 5)
     path = _cache_path(question, max_results)
 
@@ -152,10 +179,13 @@ def search(question: str, config: ResearchConfig) -> list[Source]:
             logger.warning(f"Cache read failed: {e}")
 
     results: list[Source] = []
-    try:
-        results = _search_brave(question, max_results)
-    except Exception as e:
-        logger.warning(f"Brave search failed: {e}")
+    for provider_fn, name in [(_search_serper, "Serper"), (_search_brave, "Brave")]:
+        try:
+            results = provider_fn(question, max_results)
+            if results:
+                break
+        except Exception as e:
+            logger.warning(f"{name} search failed: {e}")
 
     if results:
         try:
@@ -178,13 +208,25 @@ class PlannerOutput(BaseModel):
     reasoning: str
 
 
-def plan_research(query: str, config: ResearchConfig) -> PlannerOutput:
+def plan_research(
+    query: str,
+    config: ResearchConfig,
+    initial_sources: list[Source] | None = None,
+) -> PlannerOutput:
     max_branches = config.get("max_branches", 5)
     llm = ChatOpenAI(model=config.get("planner_model", "gpt-5.4-mini"), temperature=0)
     structured = llm.with_structured_output(PlannerOutput)
+
+    initial_context = ""
+    if initial_sources:
+        lines = "\n".join(
+            f"- {s['title']}: {s['excerpt'][:200]}" for s in initial_sources[:5]
+        )
+        initial_context = f"\n\nInitial web results for this query:\n{lines}"
+
     result: PlannerOutput = structured.invoke([
         SystemMessage(content=PLANNER_PROMPT),
-        HumanMessage(content=f"Research query: {query}\nMax sub-questions allowed: {max_branches}"),
+        HumanMessage(content=f"Research query: {query}\nMax sub-questions allowed: {max_branches}{initial_context}"),
     ])
     result.sub_questions = result.sub_questions[:max_branches]
     return result
@@ -227,7 +269,10 @@ Search results:
 {sources_text}
 """),
     ])
-    result.sub_questions = result.sub_questions[:max_branches]
+    # Recursion is disabled — initial search already informs the planner.
+    # This caps searches at 1 (initial) + max_branches per question.
+    result.should_recurse = False
+    result.sub_questions = []
     return result
 
 
@@ -364,7 +409,8 @@ async def run_research(
         answer=None, timestamp=time.time(),
     ))
 
-    plan = await asyncio.to_thread(plan_research, query, config)
+    initial_sources = await asyncio.to_thread(search, query, config)
+    plan = await asyncio.to_thread(plan_research, query, config, initial_sources)
     await event_queue.put(NodeEvent(
         type="plan_complete", node_id="planner", parent_id="root",
         depth=0, question=query, sources=None, summary=plan.reasoning,

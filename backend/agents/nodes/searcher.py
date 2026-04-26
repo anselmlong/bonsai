@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 def _search_serper(question: str, max_results: int) -> list[Source]:
     api_key = os.environ.get("SERPER_API_KEY", "")
     if not api_key:
-        logger.debug("SERPER_API_KEY not set, skipping Serper")
         return []
-    logger.debug(f"Serper search: {question[:50]}...")
     response = requests.post(
         "https://google.serper.dev/search",
         headers={"X-API-KEY": api_key, "Content-Type": "application/json"},

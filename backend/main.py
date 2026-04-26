@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from backend.agents.research_graph import run_research
+# Import config FIRST to load .env before any agents import
 from backend.config import settings
+from backend.agents.research_graph import run_research
 from backend.models.types import NodeEvent, ResearchConfig
 
 app = FastAPI(title="Bonsai Research API")

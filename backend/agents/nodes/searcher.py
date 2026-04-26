@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 def _search_serper(question: str, max_results: int) -> list[Source]:
     api_key = os.environ.get("SERPER_API_KEY", "")
     if not api_key:
+        logger.debug("SERPER_API_KEY not set, skipping Serper")
         return []
+    logger.debug(f"Serper search: {question[:50]}...")
     response = requests.post(
         "https://google.serper.dev/search",
         headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
@@ -58,9 +60,12 @@ def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
     """Search via Serper → Tavily → Brave fallback chain."""
     max_results = config.get("tavily_max_results", 5)
 
-    serper_results = _search_serper(question, max_results)
-    if serper_results:
-        return serper_results
+    try:
+        serper_results = _search_serper(question, max_results)
+        if serper_results:
+            return serper_results
+    except Exception as e:
+        logger.warning(f"Serper failed: {e}, falling back to Tavily")
 
     try:
         client = TavilyClient()

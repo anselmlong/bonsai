@@ -7,6 +7,29 @@ from backend.models.types import ResearchConfig, Source
 logger = logging.getLogger(__name__)
 
 
+def _search_serper(question: str, max_results: int) -> list[Source]:
+    api_key = os.environ.get("SERPER_API_KEY", "")
+    if not api_key:
+        return []
+    response = requests.post(
+        "https://google.serper.dev/search",
+        headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+        json={"q": question, "num": max_results},
+        timeout=10,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return [
+        Source(
+            url=r.get("link", ""),
+            title=r.get("title", ""),
+            excerpt=r.get("snippet", ""),
+            score=0.0,
+        )
+        for r in data.get("organic", [])[:max_results]
+    ]
+
+
 def _search_brave(question: str, max_results: int) -> list[Source]:
     api_key = os.environ.get("BRAVE_API_KEY")
     if not api_key:
@@ -32,8 +55,12 @@ def _search_brave(question: str, max_results: int) -> list[Source]:
 
 
 def search_tavily(question: str, config: ResearchConfig) -> list[Source]:
-    """Call Tavily, fallback to Brave on failure."""
+    """Search via Serper → Tavily → Brave fallback chain."""
     max_results = config.get("tavily_max_results", 5)
+
+    serper_results = _search_serper(question, max_results)
+    if serper_results:
+        return serper_results
 
     try:
         client = TavilyClient()

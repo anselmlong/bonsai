@@ -11,3 +11,5 @@ results/
 .pytest_cache/
 .superpowers/
 .gstack/
+.omc/
+cache/

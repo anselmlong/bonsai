@@ -25,8 +25,10 @@ export function useResearchStream(jobId: string | null) {
         setEvents((prev) => [...prev, event]);
         if (event.type === "research_complete") {
           setDone(true);
+          es.close();
         }
         if (event.type === "error") {
+          setError(event.summary || "Research failed. Please try again.");
           setDone(true);
           es.close();
         }

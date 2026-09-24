@@ -1,5 +1,7 @@
 # Bonsai
 
+See [Research job limits](docs/job-lifecycle.md) for API workload bounds, job retention, failure behavior, and the single-worker/in-memory deployment limitations.
+
 
 https://github.com/user-attachments/assets/52b7f8c2-be23-4f93-ae03-57174c5b9c7c
 
